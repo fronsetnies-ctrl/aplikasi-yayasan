@@ -1,0 +1,2568 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistem Informasi Data Sekolah & Persuratan Terpadu</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#172033;line-height:1.4}
+.container{max-width:1180px;margin:auto;padding:20px}
+.card{background:#fff;border-radius:18px;box-shadow:0 8px 30px rgba(20,40,80,.08);padding:24px;margin-bottom:20px}
+.header-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px}
+h1{margin:0;font-size:25px;color:#0f172a;letter-spacing:-0.3px}
+.sub{color:#64748b;margin-bottom:18px;font-size:14px}
+
+/* Navigasi Modul Utama (PTK/Siswa vs Persuratan) */
+.main-nav{display:flex;gap:10px;margin-bottom:20px;border-bottom:2px solid #e2e8f0;padding-bottom:12px}
+.nav-tab{background:#f1f5f9;border:1px solid #cbd5e1;color:#475467;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:0.2s}
+.nav-tab:hover{background:#e2e8f0;color:#0f172a}
+.nav-tab.active{background:#2563eb;color:#fff;border-color:#2563eb;box-shadow:0 4px 12px rgba(37,99,235,.25)}
+
+/* Tombol Header & Admin */
+.btn-admin-toggle{background:#0f172a;color:#fff;border:none;padding:10px 18px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:0.2s}
+.btn-admin-toggle:hover{background:#334155}
+.btn-admin-toggle.active{background:#dc2626}
+
+/* Menu Filter Lembaga & Sub-Filter */
+.filter-section{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;margin-bottom:18px}
+.filter-group-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;margin-bottom:8px}
+.category-tabs{display:flex;gap:8px;justify-content:flex-start;flex-wrap:wrap;margin-bottom:12px}
+.tab-btn{border:1px solid #cbd5e1;background:#fff;color:#475467;padding:8px 16px;border-radius:20px;cursor:pointer;font-weight:700;font-size:13px;transition:0.2s}
+.tab-btn:hover{background:#f1f5f9}
+.tab-btn.active{background:#2563eb;color:#fff;border-color:#2563eb;box-shadow:0 4px 10px rgba(37,99,235,.2)}
+.tab-btn.tab-yayasan.active{background:#d97706;border-color:#d97706;box-shadow:0 4px 10px rgba(217,119,6,.25)}
+
+.status-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip-btn{border:1px solid #e2e8f0;background:#fff;color:#475467;padding:6px 12px;border-radius:16px;cursor:pointer;font-size:12px;font-weight:600;transition:0.2s}
+.chip-btn:hover{background:#f1f5f9}
+.chip-btn.active{background:#0f172a;color:#fff;border-color:#0f172a}
+.chip-btn.chip-masuk.active{background:#0284c7;border-color:#0284c7}
+.chip-btn.chip-keluar.active{background:#7c3aed;border-color:#7c3aed}
+.chip-btn.chip-sk.active{background:#059669;border-color:#059669}
+.chip-btn.chip-lulus.active{background:#059669;border-color:#059669}
+.chip-btn.chip-mutasi.active{background:#d97706;border-color:#d97706}
+.chip-btn.chip-berhenti.active{background:#dc2626;border-color:#dc2626}
+
+/* Form Pencarian */
+.search{display:flex;gap:10px}
+input,select,textarea{font-family:inherit;box-sizing:border-box}
+input[type="search"],input[type="text"],input[type="date"],select,.form-input{flex:1;padding:12px 16px;border:1px solid #ccd5e1;border-radius:12px;font-size:14px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+button{border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer;font-size:14px}
+.btn-primary{background:#2563eb;color:white}
+.btn-secondary{background:#e9eef5;color:#344054}
+
+/* Bar Informasi */
+.info{display:flex;justify-content:space-between;gap:10px;margin-top:14px;color:#64748b;font-size:13px;flex-wrap:wrap;align-items:center}
+#statusMsg, #statusMsgSurat{margin-top:16px;padding:12px 16px;border-radius:10px;background:#eef5ff;color:#175cd3;font-size:14px}
+
+/* Panel Bar Admin */
+.admin-bar{display:none;background:#f8fafc;border:1px dashed #94a3b8;border-radius:14px;padding:14px 18px;margin-bottom:18px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.admin-bar.show{display:flex}
+.admin-badge{background:#fee2e2;color:#991b1b;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:800}
+.admin-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:8px}
+.btn-add{background:#16a34a;color:#fff}
+.btn-reset-db{background:#64748b;color:#fff}
+.btn-import{background:#0284c7;color:#fff}
+.btn-upload-status{background:#7c3aed;color:#fff}
+.btn-export{background:#475569;color:#fff}
+.btn-template{background:#f1f5f9;color:#0f172a;border:1px solid #cbd5e1}
+.import-box{border:2px dashed #cbd5e1;padding:16px;border-radius:12px;background:#f8fafc;text-align:center;margin-bottom:12px;cursor:pointer;transition:0.2s}
+.import-box:hover{border-color:#0284c7;background:#f0f9ff}
+.import-preview-badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;margin-top:6px;background:#dbeafe;color:#1e40af}
+
+/* Hasil & Kartu */
+.results{margin-top:16px;display:grid;gap:12px}
+.result{border:1px solid #e2e8f0;border-radius:14px;padding:16px;background:#fff;transition:box-shadow .2s;position:relative}
+.result:hover{box-shadow:0 4px 14px rgba(0,0,0,.05)}
+.result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+.name{font-weight:800;font-size:17px;color:#0f172a}
+.badges-container{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.badge{display:inline-block;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:800}
+.badge.tk{background:#fef3c7;color:#92400e}
+.badge.smp{background:#e0f2fe;color:#0369a1}
+.badge.smk{background:#dcfce7;color:#15803d}
+.badge.mi{background:#f3e8ff;color:#6b21a8}
+.badge.yayasan{background:#fef9c3;color:#854d0e;border:1px solid #fde047}
+
+/* Badges Status & Sifat */
+.badge-status{display:inline-block;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:800}
+.badge-status.siswa{background:#f1f5f9;color:#334155}
+.badge-status.lulus{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+.badge-status.mutasi{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+.badge-status.berhenti{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+.badge-status.ptk{background:#e0e7ff;color:#3730a3}
+.badge-surat{display:inline-block;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:800}
+.badge-surat.masuk{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
+.badge-surat.keluar{background:#f3e8ff;color:#6b21a8;border:1px solid #e9d5ff}
+.badge-surat.sk{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+
+/* Sifat Surat */
+.badge-sifat{display:inline-block;padding:3px 8px;border-radius:8px;font-size:11px;font-weight:700;background:#f1f5f9;color:#475467}
+.badge-sifat.penting{background:#fee2e2;color:#991b1b}
+.badge-sifat.undangan{background:#dbeafe;color:#1e40af}
+.badge-sifat.sk{background:#fef3c7;color:#92400e}
+
+.detail{font-size:13px;color:#475467;margin-bottom:8px;line-height:1.5;background:#f8fafc;padding:8px 12px;border-radius:8px;border-left:3px solid #cbd5e1}
+.surat-meta{display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:8px;margin-bottom:8px;background:#f8fafc;padding:10px 14px;border-radius:10px;font-size:13px}
+.surat-meta-item b{color:#0f172a}
+.email-box{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f5f8ff;padding:8px 12px;border-radius:8px;margin-bottom:6px;flex-wrap:wrap}
+.email-text{font-family:Consolas,monospace;color:#175cd3;word-break:break-all;font-size:13px}
+.btn-copy{background:#e0f2fe;color:#0369a1;border:none;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer}
+.btn-copy:hover{background:#bae6fd}
+.num{display:inline-block;margin-top:6px;font-size:12px;color:#94a3b8}
+
+/* Action button pada tiap item */
+.item-actions{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed #e2e8f0;gap:8px;justify-content:flex-end}
+.admin-mode .item-actions{display:flex}
+.btn-action-edit{background:#e0f2fe;color:#0369a1;padding:6px 12px;font-size:12px;border-radius:6px}
+.btn-action-delete{background:#fee2e2;color:#b91c1c;padding:6px 12px;font-size:12px;border-radius:6px}
+
+/* Modal Popup */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,.6);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:999;padding:16px}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;width:100%;max-width:560px;border-radius:18px;box-shadow:0 20px 40px rgba(0,0,0,.2);padding:24px;position:relative;max-height:90vh;overflow-y:auto}
+.modal-box h2{margin-top:0;font-size:20px;color:#0f172a;margin-bottom:14px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:700;color:#334155;margin-bottom:5px}
+.form-input{width:100%}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.btn-cancel{background:#e2e8f0;color:#334155}
+.btn-save{background:#2563eb;color:#fff}
+
+/* Toast Message */
+#toastBox{position:fixed;bottom:24px;right:24px;background:#0f172a;color:#fff;padding:12px 20px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);font-size:14px;z-index:1000;display:none;animation:fadeIn 0.2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.empty{text-align:center;padding:32px 20px;color:#64748b;line-height:1.6}
+.footer{text-align:center;color:#98a2b3;font-size:12px;padding:14px}
+@media(max-width:650px){.search{flex-direction:column}.search button{width:100%}h1{font-size:22px}.container{padding:14px}.main-nav{flex-direction:column}}
+
+/* Desain Khusus Menu Upload Siswa Lulus/Mutasi/Berhenti */
+.upload-card-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;margin-bottom:18px}
+.upload-setting-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:16px}
+.upload-setting-title{font-size:13px;font-weight:800;color:#0f172a;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.upload-methods-tabs{display:flex;gap:8px;margin-bottom:14px;border-bottom:1px solid #e2e8f0;padding-bottom:10px}
+.upload-m-btn{background:#fff;border:1px solid #cbd5e1;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:0.2s}
+.upload-m-btn.active{background:#7c3aed;color:#fff;border-color:#7c3aed}
+.data-table-container{overflow-x:auto;background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-top:14px}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;text-align:left}
+.data-table th{background:#f1f5f9;color:#334155;padding:10px 14px;font-weight:700;border-bottom:1px solid #cbd5e1;white-space:nowrap}
+.data-table td{padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#1e293b}
+.data-table tr:hover td{background:#f8fafc}
+.status-pill{display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:700}
+.status-pill.lulus{background:#d1fae5;color:#065f46}
+.status-pill.mutasi{background:#fef3c7;color:#92400e}
+.status-pill.berhenti{background:#fee2e2;color:#991b1b}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="header-top">
+      <div>
+        <h1>🏛️ Portal Terpadu Sekolah & Yayasan NW Kumbung</h1>
+        <div class="sub">Database Akun Belajar.id, Data Guru & Siswa, serta Administrasi Buku Agenda Surat Masuk/Keluar.</div>
+      </div>
+      <button id="btnToggleAdmin" class="btn-admin-toggle" type="button">⚙️ Mode Admin: Nonaktif</button>
+    </div>
+
+    <!-- Tab Pengalih Modul Utama -->
+    <div class="main-nav">
+      <button id="tabNavData" class="nav-tab active" type="button">👥 Data PTK & Siswa</button>
+      <button id="tabNavUploadSiswa" class="nav-tab" type="button">📤 Menu Upload Siswa (Lulus / Pindah / Berhenti)</button>
+      <button id="tabNavSurat" class="nav-tab" type="button">📑 Buku Agenda Surat (Masuk & Keluar)</button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODUL 1: PENCARIAN DATA PTK & STATUS SISWA -->
+    <!-- ========================================== -->
+    <div id="modulDataSekolah">
+      <!-- Panel Bar Admin Data PTK/Siswa -->
+      <div id="adminPanelBar" class="admin-bar">
+        <div>
+          <span class="admin-badge">MODE ADMIN DATA AKTIF</span>
+          <span style="font-size:13px;color:#475467;margin-left:8px;">Kelola PTK, siswa aktif, lulusan, mutasi, atau berhenti.</span>
+        </div>
+        <div class="admin-actions">
+          <button id="btnTambahBaru" class="btn-sm btn-add" type="button">➕ Tambah Satuan</button>
+          <button id="btnUploadStatusSiswa" class="btn-sm btn-upload-status" type="button">📤 Upload Status Siswa</button>
+          <button id="btnImportCepat" class="btn-sm btn-import" type="button">⚡ Tambah Massal (CSV)</button>
+          <button id="btnEksporCSV" class="btn-sm btn-export" type="button">📥 Ekspor CSV</button>
+          <button id="btnResetDefault" class="btn-sm btn-reset-db" type="button">🔄 Reset Default</button>
+        </div>
+      </div>
+
+      <!-- Filter Lembaga & Status Siswa -->
+      <div class="filter-section">
+        <div class="filter-group-title">1. Pilih Lembaga Pendidikan:</div>
+        <div class="category-tabs" id="kategoriList">
+          <button class="tab-btn active" data-kat="ALL" type="button">Semua Lembaga</button>
+          <button class="tab-btn" data-kat="TK" type="button">TK Al-Mujahidin NW</button>
+          <button class="tab-btn" data-kat="MI" type="button">MI Al-Mujahidin NW</button>
+          <button class="tab-btn" data-kat="SMP" type="button">SMP Islam NW Kumbung</button>
+          <button class="tab-btn" data-kat="SMK" type="button">SMKS Al-Mujahidin NW</button>
+        </div>
+
+        <div class="filter-group-title">2. Kategori / Status:</div>
+        <div class="status-chips" id="statusChipsList">
+          <button class="chip-btn active" data-status="ALL" type="button">Semua Status</button>
+          <button class="chip-btn" data-status="PTK" type="button">👨‍🏫 Guru / PTK</button>
+          <button class="chip-btn" data-status="SISWA" type="button">🎒 Siswa Aktif</button>
+          <button class="chip-btn chip-lulus" data-status="LULUS" type="button">🎓 Siswa Lulus</button>
+          <button class="chip-btn chip-mutasi" data-status="MUTASI" type="button">🔄 Mutasi / Pindah</button>
+          <button class="chip-btn chip-berhenti" data-status="BERHENTI" type="button">⛔ Siswa Berhenti</button>
+        </div>
+      </div>
+
+      <!-- Kolom Pencarian Siswa/PTK -->
+      <div class="search">
+        <input id="nama" type="search" autocomplete="off" placeholder="Ketik nama, NUPTK, NIK, NISN, atau akun belajar.id..." aria-label="Nama">
+        <button id="btnCari" class="btn-primary" type="button">Cari</button>
+        <button id="btnReset" class="btn-secondary" type="button">Reset</button>
+      </div>
+
+      <div class="info">
+        <span id="jumlahData">Memuat database...</span>
+        <span id="jumlahHasil"></span>
+      </div>
+
+      <div id="statusMsg" hidden></div>
+      <div id="hasil" class="results"></div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODUL KHUSUS: UPLOAD SISWA LULUS, PINDAH/MUTASI & BERHENTI -->
+    <!-- ========================================================= -->
+    <div id="modulUploadSiswa" style="display:none;">
+      <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:14px;padding:16px 20px;margin-bottom:18px;">
+        <h2 style="margin:0 0 6px 0;font-size:18px;color:#5b21b6;display:flex;align-items:center;gap:8px;">
+          📤 Manajemen & Upload Siswa (Lulus, Mutasi/Pindah, & Berhenti)
+        </h2>
+        <div style="font-size:13px;color:#6b21a8;line-height:1.5;">
+          Gunakan menu ini untuk mencatat dan mengunggah data siswa yang telah <b>Lulus</b>, <b>Pindah/Mutasi</b>, atau <b>Berhenti</b> pada masing-masing jenjang (TK, MI, SMP, SMK). Data yang diunggah akan otomatis terintegrasi ke pencarian sekolah.
+        </div>
+      </div>
+
+      <!-- Pemilihan Lembaga & Status Target -->
+      <div class="upload-card-grid">
+        <div class="upload-setting-box">
+          <div class="upload-setting-title">🏫 1. Pilih Lembaga Pendidikan:</div>
+          <select id="selModulLembaga" class="form-input" style="font-weight:700;font-size:14px;border-color:#cbd5e1;">
+            <option value="SMP">SMP Islam NW Kumbung</option>
+            <option value="SMK">SMKS Al-Mujahidin NW</option>
+            <option value="TK">TK Al-Mujahidin NW</option>
+            <option value="MI">MI Al-Mujahidin NW</option>
+          </select>
+        </div>
+
+        <div class="upload-setting-box">
+          <div class="upload-setting-title">📋 2. Pilih Status Siswa:</div>
+          <select id="selModulStatus" class="form-input" style="font-weight:700;font-size:14px;border-color:#cbd5e1;">
+            <option value="LULUS">🎓 Siswa Lulus</option>
+            <option value="MUTASI">🔄 Pindah / Mutasi</option>
+            <option value="BERHENTI">⛔ Siswa Berhenti</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Form & Metode Upload -->
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:20px;box-shadow:0 4px 16px rgba(0,0,0,.03);margin-bottom:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+          <div class="upload-methods-tabs" style="margin-bottom:0;border-bottom:none;padding-bottom:0;">
+            <button type="button" class="upload-m-btn active" id="btnMetodePaste">📋 Tempel (Paste) dari Excel</button>
+            <button type="button" class="upload-m-btn" id="btnMetodeFile">📁 Unggah File CSV</button>
+            <button type="button" class="upload-m-btn" id="btnMetodeManual">✍️ Input Satuan Manual</button>
+          </div>
+          <button type="button" id="btnDownloadTemplateMenu" class="btn-sm btn-template" style="display:inline-flex;align-items:center;gap:6px;">
+            📄 Unduh Format Excel / CSV
+          </button>
+        </div>
+
+        <!-- Metode 1: Paste Excel -->
+        <div id="areaMetodePaste">
+          <p style="font-size:13px;color:#64748b;margin-top:0;margin-bottom:8px;">
+            Salin baris dari Microsoft Excel lalu tempelkan di kotak bawah ini. Format kolom: <code>Nama Siswa, NISN / Kelas, Keterangan (Tahun Lulus/Alasan/Sekolah Tujuan), Akun Belajar ID (Opsional)</code>
+          </p>
+          <textarea id="modulPasteTextarea" class="form-input" rows="6" placeholder="Contoh:&#10;Muhammad Ridwan, NISN: 0071234567, Lulus Tahun Ajaran 2024/2025, ridwan@smp.belajar.id&#10;Siti Zahra, NISN: 0089876543, Pindah ke MTsN 1 Lombok Timur, -"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:10px;">
+            <span id="labelHitungDeteksi" class="import-preview-badge" style="font-size:13px;">0 data siswa terdeteksi</span>
+            <button type="button" id="btnEksekusiUploadPaste" class="btn-primary" style="background:#7c3aed;padding:10px 22px;">
+              🚀 Simpan ke Database Siswa
+            </button>
+          </div>
+        </div>
+
+        <!-- Metode 2: Upload File CSV -->
+        <div id="areaMetodeFile" style="display:none;">
+          <div class="import-box" id="dropAreaModulUpload" style="padding:28px 16px;">
+            <input type="file" id="fileCsvModulInput" accept=".csv, .tsv, .txt" style="display:none;">
+            <div style="font-size:32px;margin-bottom:6px;">📂</div>
+            <div style="font-weight:700;font-size:15px;color:#0f172a;">Klik atau Tarik Berkas CSV ke Kotak Ini</div>
+            <div style="font-size:12px;color:#64748b;margin-top:4px;">Mendukung berkas CSV atau TSV ekspor dari Microsoft Excel</div>
+          </div>
+          <div id="fileInfoLabel" style="font-size:13px;color:#15803d;font-weight:700;margin-top:8px;display:none;"></div>
+          <div style="text-align:right;margin-top:12px;">
+            <button type="button" id="btnEksekusiUploadFile" class="btn-primary" style="background:#7c3aed;padding:10px 22px;" disabled>
+              🚀 Proses Berkas & Simpan
+            </button>
+          </div>
+        </div>
+
+        <!-- Metode 3: Input Satuan Manual -->
+        <div id="areaMetodeManual" style="display:none;">
+          <form id="formUploadSatuan">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:12px;">
+              <div>
+                <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:4px;">Nama Lengkap Siswa *</label>
+                <input type="text" id="manualNamaSiswa" class="form-input" required placeholder="Contoh: Ahmad Baihaqi">
+              </div>
+              <div>
+                <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:4px;">NISN / Kelas Terakhir</label>
+                <input type="text" id="manualNisnSiswa" class="form-input" placeholder="Contoh: NISN: 0081234567 / Kelas IX-B">
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:12px;">
+              <div>
+                <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:4px;">Keterangan / Tahun Lulus / Alasan Pindah</label>
+                <input type="text" id="manualKeteranganSiswa" class="form-input" placeholder="Contoh: Lulus Tahun 2024/2025 / Ikut Orang Tua">
+              </div>
+              <div>
+                <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:4px;">Akun Belajar.id (Jika Ada)</label>
+                <input type="email" id="manualEmailSiswa" class="form-input" placeholder="contoh: nama@smp.belajar.id (opsional)">
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <button type="submit" class="btn-primary" style="background:#7c3aed;padding:10px 22px;">
+                ➕ Tambahkan Siswa Ini
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tabel Daftar Siswa Terdata Berdasarkan Lembaga & Status -->
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:20px;box-shadow:0 4px 16px rgba(0,0,0,.03);">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px;">
+          <div>
+            <h3 style="margin:0;font-size:16px;color:#0f172a;" id="judulTabelStatusSiswa">Daftar Siswa</h3>
+            <div style="font-size:12px;color:#64748b;" id="subJudulTabelStatusSiswa">Menampilkan data sesuai lembaga & status yang dipilih di atas</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input type="search" id="cariTabelStatusSiswa" placeholder="Saring nama di tabel..." class="form-input" style="padding:7px 12px;font-size:13px;width:200px;">
+            <button type="button" id="btnEksporStatusSiswa" class="btn-sm btn-export">📥 Ekspor CSV</button>
+          </div>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:40px;">No</th>
+                <th>Nama Siswa</th>
+                <th>Lembaga</th>
+                <th>Status</th>
+                <th>NISN / Detail & Keterangan</th>
+                <th>Akun Belajar.id</th>
+                <th style="text-align:center;width:100px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="isiTabelStatusSiswa">
+              <tr>
+                <td colspan="7" style="text-align:center;color:#64748b;padding:24px;">Memuat data siswa...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODUL 2: BUKU AGENDA SURAT (MASUK & KELUAR)    -->
+    <!-- ============================================== -->
+    <div id="modulPersuratan" style="display:none;">
+      <!-- Panel Kontrol Admin Surat -->
+      <div id="adminPanelSurat" class="admin-bar">
+        <div>
+          <span class="admin-badge" style="background:#fef3c7;color:#92400e;">MODE ADMIN PERSURATAN</span>
+          <span style="font-size:13px;color:#475467;margin-left:8px;">Kelola buku agenda surat masuk & keluar per lembaga / yayasan.</span>
+        </div>
+        <div class="admin-actions">
+          <button id="btnTambahSurat" class="btn-sm btn-add" type="button">➕ Catat Surat Baru</button>
+          <button id="btnImportSurat" class="btn-sm btn-import" type="button">⚡ Unggah Massal (CSV)</button>
+          <button id="btnEksporSurat" class="btn-sm btn-export" type="button">📥 Ekspor Agenda CSV</button>
+          <button id="btnTemplateSurat" class="btn-sm btn-template" type="button">📄 Unduh Template</button>
+        </div>
+      </div>
+
+      <!-- Filter Persuratan: Lembaga & Tipe Surat -->
+      <div class="filter-section">
+        <div class="filter-group-title">1. Pilih Lembaga / Yayasan:</div>
+        <div class="category-tabs" id="kategoriSuratList">
+          <button class="tab-btn active" data-surat-lembaga="ALL" type="button">Semua Bagian</button>
+          <button class="tab-btn tab-yayasan" data-surat-lembaga="YAYASAN" type="button">🏛️ Yayasan / Pondok Pesantren</button>
+          <button class="tab-btn" data-surat-lembaga="TK" type="button">TK Al-Mujahidin NW</button>
+          <button class="tab-btn" data-surat-lembaga="MI" type="button">MI Al-Mujahidin NW</button>
+          <button class="tab-btn" data-surat-lembaga="SMP" type="button">SMP Islam NW Kumbung</button>
+          <button class="tab-btn" data-surat-lembaga="SMK" type="button">SMKS Al-Mujahidin NW</button>
+        </div>
+
+        <div class="filter-group-title">2. Jenis Surat:</div>
+        <div class="status-chips" id="tipeSuratChips">
+          <button class="chip-btn active" data-tipe="ALL" type="button">Semua Jenis Surat</button>
+          <button class="chip-btn chip-masuk" data-tipe="MASUK" type="button">📥 Surat Masuk</button>
+          <button class="chip-btn chip-keluar" data-tipe="KELUAR" type="button">📤 Surat Keluar</button>
+          <button class="chip-btn chip-sk" data-tipe="SK" type="button">📜 Surat Keputusan (SK)</button>
+        </div>
+      </div>
+
+      <!-- Formulir Input Manual SK, Surat Masuk & Surat Keluar -->
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:20px;box-shadow:0 4px 16px rgba(0,0,0,.03);margin-bottom:20px;">
+        <h3 style="margin:0 0 6px 0;font-size:16px;color:#0f172a;display:flex;align-items:center;gap:8px;">
+          ✍️ Formulir Input Manual SK, Surat Masuk & Surat Keluar
+        </h3>
+        <p style="font-size:13px;color:#64748b;margin:0 0 14px 0;">
+          Isi nomor dan berkas persuratan secara manual untuk Yayasan / Pondok Pesantren maupun unit lembaga (TK, MI, SMP, SMK).
+        </p>
+        <form id="formManualSuratDirect">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-bottom:12px;">
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:4px;">1. Jenis Dokumen *</label>
+              <select id="directSuratTipe" class="form-input" style="font-weight:700;" required>
+                <option value="MASUK">📥 Surat Masuk</option>
+                <option value="KELUAR">📤 Surat Keluar</option>
+                <option value="SK">📜 Surat Keputusan (SK)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:4px;">2. Bagian / Lembaga *</label>
+              <select id="directSuratLembaga" class="form-input" style="font-weight:700;" required>
+                <option value="YAYASAN">🏛️ Yayasan / Pondok Pesantren</option>
+                <option value="SMP">SMP Islam NW Kumbung</option>
+                <option value="SMK">SMKS Al-Mujahidin NW</option>
+                <option value="TK">TK Al-Mujahidin NW</option>
+                <option value="MI">MI Al-Mujahidin NW</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:4px;">3. Tanggal Surat / SK *</label>
+              <input type="date" id="directSuratTanggal" class="form-input" required>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:4px;">4. Sifat Surat</label>
+              <select id="directSuratSifat" class="form-input">
+                <option value="Biasa">Biasa</option>
+                <option value="Penting">Penting</option>
+                <option value="Undangan">Undangan</option>
+                <option value="SK / Penetapan">SK / Penetapan</option>
+                <option value="Pemberitahuan">Pemberitahuan</option>
+                <option value="Rahasia">Rahasia</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:12px;margin-bottom:12px;">
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:4px;" id="labelDirectSuratNomor">Nomor Surat / SK *</label>
+              <input type="text" id="directSuratNomor" class="form-input" required placeholder="Contoh: 015/YAY-NW/KMB/SK/2024 atau 102/SMP-NW/TU/2024">
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:4px;" id="labelDirectSuratPihak">Pengirim (Asal Surat) *</label>
+              <input type="text" id="directSuratPihak" class="form-input" required placeholder="Nama instansi pengirim / tujuan / penetap SK">
+            </div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:4px;">Perihal / Tentang / Judul Ketetapan *</label>
+            <textarea id="directSuratPerihal" class="form-input" rows="2" required placeholder="Contoh: Surat Keputusan Pengangkatan Guru / Undangan Rapat Koordinasi"></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:12px;margin-bottom:14px;">
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#334155;display:block;margin-bottom:4px;">Lokasi Berkas Fisik / Tautan Arsip Scan (Opsional)</label>
+              <input type="text" id="directSuratBerkas" class="form-input" placeholder="Contoh: Bantex Lemari Yayasan / Map SK No. 2">
+            </div>
+            <div style="display:flex;align-items:flex-end;justify-content:flex-end;">
+              <button type="submit" class="btn-primary" style="background:#059669;padding:12px 24px;width:100%;max-width:280px;">
+                💾 Simpan Surat / SK Manual
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Kolom Pencarian Surat -->
+      <div class="search">
+        <input id="inputCariSurat" type="search" autocomplete="off" placeholder="Ketik nomor surat, perihal, nama pengirim, atau instansi tujuan..." aria-label="Cari Surat">
+        <button id="btnCariSurat" class="btn-primary" type="button">Cari Surat</button>
+        <button id="btnResetSurat" class="btn-secondary" type="button">Reset</button>
+      </div>
+
+      <div class="info">
+        <span id="jumlahDataSurat">Memuat data surat...</span>
+        <span id="jumlahHasilSurat"></span>
+      </div>
+
+      <div id="statusMsgSurat" hidden></div>
+      <div id="hasilSurat" class="results"></div>
+    </div>
+  </div>
+  <div class="footer">Data yang diedit, ditambah, atau diunggah tersimpan secara aman di peramban lokal perangkat Anda.</div>
+</div>
+
+<!-- ============================================== -->
+<!-- MODAL DIALOGS                                  -->
+<!-- ============================================== -->
+
+<!-- Modal Tambah/Edit Surat -->
+<div id="modalSuratForm" class="modal-overlay">
+  <div class="modal-box">
+    <h2 id="modalSuratTitle">➕ Catat Surat Baru</h2>
+    <form id="suratForm">
+      <input type="hidden" id="formSuratIndex" value="-1">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="formSuratTipe">Jenis Surat *</label>
+          <select id="formSuratTipe" class="form-input" required>
+            <option value="MASUK">📥 Surat Masuk</option>
+            <option value="KELUAR">📤 Surat Keluar</option>
+            <option value="SK">📜 Surat Keputusan (SK)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="formSuratLembaga">Lembaga / Yayasan *</label>
+          <select id="formSuratLembaga" class="form-input" required>
+            <option value="YAYASAN">🏛️️ Yayasan / Pondok Pesantren</option>
+            <option value="SMP">SMP Islam NW Kumbung</option>
+            <option value="SMK">SMKS Al-Mujahidin NW</option>
+            <option value="TK">TK Al-Mujahidin NW</option>
+            <option value="MI">MI Al-Mujahidin NW</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="formSuratNomor">Nomor Surat *</label>
+        <input type="text" id="formSuratNomor" class="form-input" required placeholder="Contoh: 045/YAY-NW/KMB/X/2024 atau 102/SMP-NW/TU/2024">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="formSuratTanggal">Tanggal Surat *</label>
+          <input type="date" id="formSuratTanggal" class="form-input" required>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="formSuratSifat">Sifat Surat</label>
+          <select id="formSuratSifat" class="form-input">
+            <option value="Biasa">Biasa</option>
+            <option value="Penting">Penting</option>
+            <option value="Undangan">Undangan</option>
+            <option value="SK / Penetapan">SK / Penetapan</option>
+            <option value="Pemberitahuan">Pemberitahuan</option>
+            <option value="Rahasia">Rahasia</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="formSuratPihak" id="labelSuratPihak">Pengirim (Asal Surat) *</label>
+        <input type="text" id="formSuratPihak" class="form-input" required placeholder="Nama instansi / pejabat / perorangan">
+      </div>
+
+      <div class="form-group">
+        <label for="formSuratPerihal">Perihal / Ringkasan Isi Surat *</label>
+        <textarea id="formSuratPerihal" class="form-input" rows="3" required placeholder="Contoh: Undangan Rapat Koordinasi Kurikulum Pesantren / Permohonan Bantuan Sarpras"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="formSuratBerkas">Keterangan / Lokasi Berkas Fisik / Tautan Arsip</label>
+        <input type="text" id="formSuratBerkas" class="form-input" placeholder="Contoh: Bantex Lemari 2 / drive.google.com/contoh-file-scan">
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="btnBatalSuratForm" class="btn-cancel">Batal</button>
+        <button type="submit" class="btn-save">Simpan Agenda Surat</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Impor CSV Surat Massal -->
+<div id="modalImportSurat" class="modal-overlay">
+  <div class="modal-box" style="max-width:640px;">
+    <h2>⚡ Unggah Massal Agenda Surat</h2>
+    <p style="color:#64748b;font-size:13px;margin-top:-6px;margin-bottom:14px;">
+      Unggah berkas CSV atau tempel tabel Excel buku agenda surat masuk & keluar untuk Yayasan atau Lembaga sekolah.
+    </p>
+
+    <div class="import-box" id="dropAreaSurat">
+      <input type="file" id="fileCsvSuratInput" accept=".csv, .tsv, .txt" style="display:none;">
+      <div style="font-size:24px;margin-bottom:4px;">📂</div>
+      <div style="font-weight:700;font-size:14px;color:#0f172a;">Pilih Berkas CSV Agenda Surat atau Tarik ke Sini</div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:10px;">
+      <label for="pasteCsvSuratInput" style="display:flex;justify-content:space-between;">
+        <span>Atau Tempel (Paste) Teks Tabel Di Sini:</span>
+        <span id="previewCountSuratLabel" class="import-preview-badge">0 baris terdeteksi</span>
+      </label>
+      <textarea id="pasteCsvSuratInput" class="form-input" rows="5" placeholder="Format:&#10;Jenis(MASUK/KELUAR), Lembaga(YAYASAN/TK/MI/SMP/SMK), No Surat, Tanggal(YYYY-MM-DD), Pengirim/Tujuan, Perihal, Sifat, Keterangan"></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" id="btnBatalImportSurat" class="btn-cancel">Batal</button>
+      <button type="button" id="btnProsesImportSurat" class="btn-save" style="background:#0284c7;">🚀 Simpan ke Agenda Surat</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Upload Khusus Status Siswa -->
+<div id="modalUploadStatus" class="modal-overlay">
+  <div class="modal-box" style="max-width:640px;">
+    <h2>📤 Upload Status Siswa per Lembaga</h2>
+    <p style="color:#64748b;font-size:13px;margin-top:-6px;margin-bottom:14px;">
+      Unggah daftar siswa <b>Lulus</b>, <b>Mutasi/Pindah</b>, atau <b>Berhenti</b> untuk lembaga <b>TK, MI, SMP, atau SMK</b>.
+    </p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div>
+        <label style="font-size:13px;font-weight:700;color:#334155;display:block;margin-bottom:4px;">Target Lembaga *</label>
+        <select id="uploadTargetLembaga" class="form-input" style="font-weight:700;">
+          <option value="SMP">SMP Islam NW Kumbung</option>
+          <option value="SMK">SMKS Al-Mujahidin NW</option>
+          <option value="TK">TK Al-Mujahidin NW</option>
+          <option value="MI">MI Al-Mujahidin NW</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:13px;font-weight:700;color:#334155;display:block;margin-bottom:4px;">Status Siswa *</label>
+        <select id="uploadTargetStatus" class="form-input" style="font-weight:700;">
+          <option value="LULUS">🎓 Siswa Lulus</option>
+          <option value="MUTASI">🔄 Mutasi / Pindah</option>
+          <option value="BERHENTI">⛔ Siswa Berhenti</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+      <button type="button" id="btnDownloadTemplateStatus" class="btn-sm btn-template">📄 Unduh Contoh Template Status CSV</button>
+      <span style="font-size:12px;color:#64748b;">Format: <code>Nama, NISN/Detail, Keterangan Tambahan, Email</code></span>
+    </div>
+
+    <div class="import-box" id="dropAreaStatus">
+      <input type="file" id="fileCsvStatusInput" accept=".csv, .tsv, .txt" style="display:none;">
+      <div style="font-size:24px;margin-bottom:4px;">📂</div>
+      <div style="font-weight:700;font-size:14px;color:#0f172a;">Pilih Berkas CSV atau Tarik ke Sini</div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:10px;">
+      <label for="pasteCsvStatusInput" style="display:flex;justify-content:space-between;">
+        <span>Atau Tempel (Paste) Teks Tabel Di Sini:</span>
+        <span id="previewCountStatusLabel" class="import-preview-badge">0 nama terdeteksi</span>
+      </label>
+      <textarea id="pasteCsvStatusInput" class="form-input" rows="5" placeholder="Contoh:&#10;Muhammad Ridwan, NISN: 0071234567, Lulus Tahun 2024/2025, ridwan@smp.belajar.id&#10;Siti Zahra, NISN: 0089876543, Pindah ke MTsN 1 Lombok Timur, -"></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" id="btnBatalUploadStatus" class="btn-cancel">Batal</button>
+      <button type="button" id="btnProsesUploadStatus" class="btn-save" style="background:#7c3aed;">🚀 Simpan ke Database</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Form Tambah / Edit Data Siswa & PTK -->
+<div id="modalForm" class="modal-overlay">
+  <div class="modal-box">
+    <h2 id="modalTitle">Tambah Data Satuan</h2>
+    <form id="ptkForm">
+      <input type="hidden" id="formIndex" value="-1">
+      
+      <div class="form-group">
+        <label for="formNama">Nama Lengkap *</label>
+        <input type="text" id="formNama" class="form-input" required placeholder="Contoh: Rahmat Gufron Tsani / Ahmad Fauzi">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label for="formKategori">Lembaga *</label>
+          <select id="formKategori" class="form-input" required>
+            <option value="TK">TK</option>
+            <option value="MI">MI</option>
+            <option value="SMP">SMP</option>
+            <option value="SMK">SMK</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="formStatus">Tipe / Status *</label>
+          <select id="formStatus" class="form-input" required>
+            <option value="PTK">Guru / PTK</option>
+            <option value="SISWA">Siswa Aktif</option>
+            <option value="LULUS">🎓 Siswa Lulus</option>
+            <option value="MUTASI">🔄 Mutasi / Pindah</option>
+            <option value="BERHENTI">⛔ Siswa Berhenti</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="formEmail">Akun Belajar.id (Email)</label>
+        <input type="email" id="formEmail" class="form-input" placeholder="contoh: nama@guru.smp.belajar.id (atau kosongkan)">
+      </div>
+
+      <div class="form-group">
+        <label for="formDetail">Detail / Keterangan (NISN, NUPTK, NIK, Alasan, Tahun)</label>
+        <textarea id="formDetail" class="form-input" rows="3" placeholder="Contoh: NISN: 00712345 | Lulus Tahun Ajaran 2024/2025 | Ijazah Lengkap"></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="btnBatalForm" class="btn-cancel">Batal</button>
+        <button type="submit" class="btn-save">Simpan Data</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Autentikasi Password Admin -->
+<div id="modalAdminAuth" class="modal-overlay">
+  <div class="modal-box" style="max-width:400px;">
+    <h2>🔐 Akses Mode Admin</h2>
+    <p style="color:#64748b;font-size:13px;margin-top:-6px;margin-bottom:16px;">Masukkan kata sandi admin untuk mengaktifkan fitur penambahan dan perubahan data.</p>
+    <form id="adminAuthForm">
+      <div class="form-group">
+        <label for="adminPasswordInput">Kata Sandi *</label>
+        <input type="password" id="adminPasswordInput" class="form-input" required placeholder="Ketik kata sandi..." autocomplete="current-password">
+        <div id="authErrorMsg" style="color:#dc2626;font-size:12px;margin-top:6px;display:none;">⚠️ Kata sandi tidak cocok. Silakan coba lagi.</div>
+      </div>
+      <div class="modal-footer" style="margin-top:16px;">
+        <button type="button" id="btnBatalAuth" class="btn-cancel">Batal</button>
+        <button type="submit" class="btn-save">Buka Akses</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Dialog Konfirmasi -->
+<div id="modalConfirm" class="modal-overlay">
+  <div class="modal-box" style="max-width:420px;text-align:center;">
+    <h2 id="confirmTitle" style="margin-bottom:8px;">Konfirmasi</h2>
+    <p id="confirmMessage" style="color:#64748b;font-size:14px;line-height:1.5;margin-bottom:20px;">Apakah Anda yakin?</p>
+    <div class="modal-footer" style="justify-content:center;">
+      <button type="button" id="btnBatalConfirm" class="btn-cancel">Batal</button>
+      <button type="button" id="btnYaConfirm" style="background:#dc2626;color:#fff;">Ya, Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Tambah Cepat Umum PTK/Siswa -->
+<div id="modalImport" class="modal-overlay">
+  <div class="modal-box" style="max-width:640px;">
+    <h2>⚡ Tambah Cepat dari Excel / CSV</h2>
+    <p style="color:#64748b;font-size:13px;margin-top:-6px;margin-bottom:14px;">
+      Unggah file <b>.csv</b> atau tempel (paste) tabel langsung dari Microsoft Excel.
+    </p>
+
+    <div class="import-box" id="dropArea">
+      <input type="file" id="fileCsvInput" accept=".csv, .tsv, .txt" style="display:none;">
+      <div style="font-size:24px;margin-bottom:4px;">📂</div>
+      <div style="font-weight:700;font-size:14px;color:#0f172a;">Pilih Berkas CSV / Excel atau Tarik ke Sini</div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:10px;">
+      <label for="pasteCsvInput" style="display:flex;justify-content:space-between;">
+        <span>Atau Tempel (Paste) Teks Tabel Di Sini:</span>
+        <span id="previewCountLabel" class="import-preview-badge">0 data terbaca</span>
+      </label>
+      <textarea id="pasteCsvInput" class="form-input" rows="5" placeholder="Contoh:&#10;rahmat@guru.smp.belajar.id, Rahmat Gufron Tsani, SMP, NUPTK: 2844..., PTK"></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" id="btnBatalImport" class="btn-cancel">Batal</button>
+      <button type="button" id="btnProsesImport" class="btn-save" style="background:#0284c7;">🚀 Proses & Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastBox">Pemberitahuan</div>
+
+<!-- ============================================== -->
+<!-- JAVASCRIPT LOGIC                               -->
+<!-- ============================================== -->
+<script>
+(function(){
+"use strict";
+
+const STORAGE_KEY = "db_belajar_ptk_v6";
+const STORAGE_SURAT_KEY = "db_surat_yayasan_v2";
+const ADMIN_PASSWORD = "B1smill4h@";
+
+// Database Default PTK & Siswa (Data Resmi Terverifikasi)
+const DEFAULT_DATABASE = [
+  // --- TK (Dari lampiran resmi TK.png) ---
+  ["-", "Eka Juli", "TK", "NUPTK: 3551766667130093 | NIK: 52030******80004 | Jabatan: Guru | NPSN: 69892409 | TK AL-MUJAHIDIN NW", "PTK"],
+  ["-", "Patmawati", "TK", "NUPTK: 9563762663300103 | NIK: 52030******40309 | Jabatan: Guru | NPSN: 69892409 | TK AL-MUJAHIDIN NW", "PTK"],
+  ["-", "YUYUN SAUPIAH", "TK", "NUPTK: - | NIK: 52030******40008 | Jabatan: Guru | NPSN: 69892409 | TK AL-MUJAHIDIN NW", "PTK"],
+  ["-", "Zurriatun", "TK", "NUPTK: 2563762663231443 | NIK: 52030******40230 | Jabatan: Guru | NPSN: 69892409 | TK AL-MUJAHIDIN NW", "PTK"],
+  ["-", "BAIQ HULNIAWATI", "TK", "NUPTK: 9447764665230283 | NIK: 52030******50004 | Jabatan: Kepala Sekolah | NPSN: 69892409 | TK AL-MUJAHIDIN NW", "PTK"],
+
+  // --- SMP PTK (Dari lampiran smp.png & data resmi) ---
+  ["rahmattsani25@guru.smp.belajar.id", "Rahmat Gufron Tsani", "SMP", "NUPTK: 2844764667120002 | NIK: 52030******60005 | Jabatan: Guru | NPSN: 50219380 | SMP ISLAM NW KUMBUNG | Masbagik", "PTK"],
+  ["hamdiati12@guru.smp.belajar.id", "HAMDIATI", "SMP", "NUPTK: 3563762665220013 | NIK: 52030******40114 | Jabatan: Guru | NPSN: 50219380 | SMP ISLAM NW KUMBUNG | Masbagik", "PTK"],
+  ["zohdi.khaer27@guru.smp.belajar.id", "ZOHDIHAIR", "SMP", "NUPTK: 6054754656200023 | NIK: 52030******60002 | Jabatan: Guru | NPSN: 50219380 | SMP ISLAM NW KUMBUNG | Masbagik", "PTK"],
+  ["tika.puspa71@guru.smp.belajar.id", "TIKA PUSPA SARI", "SMP", "NUPTK: 5542778679230113 | NIK: 52031******00004 | Jabatan: Guru | NPSN: 50219380 | SMP ISLAM NW KUMBUNG | Masbagik", "PTK"],
+  ["m.nurul6750@guru.smp.belajar.id", "M. NURUL HIDAYAT", "SMP", "NUPTK: 4545779680130022 | NIK: 52030******10003 | Jabatan: Guru | NPSN: 50219380 | SMP ISLAM NW KUMBUNG | Masbagik", "PTK"],
+  ["irwanhadi24@guru.smp.belajar.id", "Irwan Hadi", "SMP", "NUPTK: 9734772673130052 | NIK: 52030******40003 | Jabatan: Guru | NPSN: 50219380 | SMP ISLAM NW KUMBUNG | Masbagik", "PTK"],
+  ["subardan.90@admin.smp.belajar.id", "SUBARDAN", "SMP", "NUPTK: 8333758661200013 | NIK: 52030******00001 | Jabatan: Kepala Sekolah | NPSN: 50219380 | SMP ISLAM NW KUMBUNG | Masbagik", "PTK"],
+  ["nurhidayati388@guru.smp.belajar.id", "NURHIDAYATI", "SMP", "NUPTK: 4155771672230323 | NIK: 52030******30123 | Jabatan: Guru | NPSN: 50219380 | SMP ISLAM NW KUMBUNG | Masbagik", "PTK"],
+  ["gia.hamdi31@guru.smp.belajar.id", "GIA HAMDI", "SMP", "NUPTK: 4355770671130323 | NIK: 52030******20001 | Jabatan: Guru | NPSN: 50219380 | SMP ISLAM NW KUMBUNG | Masbagik", "PTK"],
+  ["nurulaini12@guru.smp.belajar.id", "NURUL AINI", "SMP", "Jabatan: Guru | Akun Belajar: nurulaini12@guru.smp.belajar.id", "PTK"],
+  ["nurulhidayati73@guru.smp.belajar.id", "NURUL HIDAYATI", "SMP", "Jabatan: Guru | Akun Belajar: nurulhidayati73@guru.smp.belajar.id", "PTK"],
+  ["lalu.irjanawadi40@guru.smp.belajar.id", "LALU IRJANAWADIM.PD.", "SMP", "Jabatan: Guru | Akun Belajar: lalu.irjanawadi40@guru.smp.belajar.id", "PTK"],
+
+  // --- SMK PTK (15 PTK Resmi Sesuai Lampiran SMK1_4.png & smk2_4.png) ---
+  ["-", "HAIRUL ANWAR", "SMK", "NUPTK: 4563771672130543 | NIK: 52030******30152 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["-", "ERICA YAHYO THOHIROH", "SMK", "NUPTK: 2240774675230333 | NIK: 35200******60001 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["bq.salma37@guru.smp.belajar.id", "BQ. SALMA MALIDA FADHILAH", "SMK", "NUPTK: 1960778679230082 | NIK: 52030******00007 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["-", "KHAERUL HUMAM", "SMK", "NUPTK: 0637770671130442 | NIK: 52030******20005 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["-", "Syahidah", "SMK", "NUPTK: 9442770671130112 | NIK: 52030******20003 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["-", "Iswatul Hasanah", "SMK", "NUPTK: 5563766667230663 | NIK: 52030******00001 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["-", "RAUDATUL MAANI", "SMK", "NUPTK: 7846777678230212 | NIK: 52030******90005 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["nurul0914@guru.smp.belajar.id", "Nurul Hapitatul Khaer", "SMK", "NUPTK: 1252765666230253 | NIK: 52030******70004 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["-", "MUH. SUKMA DEFRI SANI", "SMK", "NUPTK: 5533775676130273 | NIK: 52030******70006 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["-", "Sukarni", "SMK", "NUPTK: 4241768669230413 | NIK: 52030******00002 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["-", "Youngki Alvian Rochman", "SMK", "NUPTK: - | NIK: 52030******40001 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["-", "Suriyandi", "SMK", "NUPTK: - | NIK: 52030******70003 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["-", "Zahid Habiburrahman", "SMK", "NUPTK: 0842773674130272 | NIK: 52030******50005 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["-", "Muhammad Khaeri", "SMK", "NUPTK: 9838764665130282 | NIK: 52031******60007 | Jabatan: Kepala Sekolah | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+  ["-", "Yulia Atikawati", "SMK", "NUPTK: 8751772673130042 | NIK: 52030******40001 | Jabatan: Guru | NPSN: 69765076 | SMKS AL-MUJAHIDIN NW KUMBUNG | Kec. Masbagik", "PTK"],
+
+  // --- SISWA (127 data siswa resmi SMP) ---
+  ["septia.ariani49@smp.belajar.id","SEPTIA ARIANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["meidina1528@smp.belajar.id","MEIDINA HARTINI LATIFA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["m.paozan133@smp.belajar.id","M. PAOZAN RAMDANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ayu.avrilia36@smp.belajar.id","AYU AVRILIA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ricko.irawan68@smp.belajar.id","RICKO IRAWAN","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["hadrosiramadani77@smp.belajar.id","HADROSI RAMADANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["fatin.selvina21@smp.belajar.id","FATIN SELVINA UTAMI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["azra.karadia44@smp.belajar.id","AZRA KARADIA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ziadatun431@smp.belajar.id","ZIADATUN MAULIDA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["qinaya.aziza45@smp.belajar.id","QINAYA AZIZA ALBANTANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muhammad.azmi56008@smp.belajar.id","MUHAMMAD AZMI FAZIL","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["annisa19161@smp.belajar.id","ANNISA AMALIA THOHA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["yogi.alfatih14@smp.belajar.id","Yogi Alfatih","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["guntur.pratama696@smp.belajar.id","GUNTUR PRATAMA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["venny.azzahra108@smp.belajar.id","VENNY AZZAHRA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muhammad.azmi61388@smp.belajar.id","MUHAMMAD AZMI FAZIL","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["rodiatul032@smp.belajar.id","RODIATUL ASROR","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["apriliana.5503@smp.belajar.id","APRILIANA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["citra.lestari38787@smp.belajar.id","Citra Lestari","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["indah.mey146@smp.belajar.id","INDAH MEY SURIANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["septiani.ariani39@smp.belajar.id","SEPTIA ARIANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ahmad.ikbal2599@smp.belajar.id","AHMAD IKBAL RONI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["cahya7338@smp.belajar.id","CAHYA MAULIDA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["mayza.aprilia9@smp.belajar.id","MAYZA APRILIA ALISTA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["novita.sari94148@smp.belajar.id","Novita Sari","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["tina.septiana155@smp.belajar.id","TINA SEPTIANA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["laela178@smp.belajar.id","LAELA SAPITRI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["siti.lailatul15967@smp.belajar.id","SITI LAILATUL AZMI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["kuswandi.1021@smp.belajar.id","KUSWANDI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["m.farid23374@smp.belajar.id","M. Farid Atalla","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["heriawan.subqi46@smp.belajar.id","HERIAWAN SUBQI SAPUTRA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["m.riyadi311@smp.belajar.id","M. RIYADI ZOM'ANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["apriliana.6103@smp.belajar.id","APRILIANA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muhamad.najmussakib50@smp.belajar.id","MUHAMAD NAJMUSSAKIB","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["afika.latifani40@smp.belajar.id","AFIKA LATIFANI SYAFITRI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["indah.mey162@smp.belajar.id","INDAH MEY SURIANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["nadia.ilyana3@smp.belajar.id","NADIA ILYANA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["riska.putri19875@smp.belajar.id","Riska Putri Ramadani","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["nazwa.nasyifa129@smp.belajar.id","NAZWA NASYIFA PUTRI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["siti.rumaiza50@smp.belajar.id","SITI RUMAIZA SALMA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muhammad.naufal400219@smp.belajar.id","MUHAMMAD NAUFAL RIZKI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["zinuraini.maysila33@smp.belajar.id","ZINURAINI MAYSILA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ulpatulilma.1@smp.belajar.id","ULPATULILMA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muhammad.surya35766@smp.belajar.id","MUHAMMAD SURYA RAMDHANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["kuswandi.1053@smp.belajar.id","KUSWANDI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["desta.hadian22@smp.belajar.id","DESTA HADIAN SAPUTRA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ahmad.ikbal2841@smp.belajar.id","AHMAD IKBAL ARONI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["m.padil4818@smp.belajar.id","M. Padil AL Ihsan","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["siti.laelatul3220@smp.belajar.id","SITI LAELATUL AZMI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["arifandi.565@smp.belajar.id","ARIFANDI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["pebrian.ardiansyah1@smp.belajar.id","Pebrian Ardiansyah","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["abdul.kholil1130@smp.belajar.id","Abdul kholil","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["siti.padila2353@smp.belajar.id","Siti Padila Azzahra","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["alfiansaputra842@smp.belajar.id","ALFIAN SAPUTRA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["zafina.abdiatin44@smp.belajar.id","ZAFINA ABDIATIN SOLEHA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["qinaya.aziza79@smp.belajar.id","QINAYA AZIZA ALBANTANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ricko.irawan89@smp.belajar.id","RICKO IRAWAN","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["resya248@smp.belajar.id","RESYA AYU NINDA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muliyani.1323@smp.belajar.id","MULIYANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["zalfa.kansa50@smp.belajar.id","ZALFA KANSA HAIRUNNISA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ahmad.hamdan1893@smp.belajar.id","AHMAD HAMDAN MUNZIR","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["afika.latifani32@smp.belajar.id","AFIKA LATIFANI SYAFITRI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["arifandi.477@smp.belajar.id","ARIFANDI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["yazid.irsyadi14@smp.belajar.id","YAZID IRSYADI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muhasror64@smp.belajar.id","MUH SYIRUL ASROR","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["siti30886@smp.belajar.id","SITI REZA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["wirajaya.94@smp.belajar.id","WIRAJAYA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["niza471@smp.belajar.id","LIZA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["siti.ziadatuk38@smp.belajar.id","SITI ZIADATUL KHAER","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["venny.azzahra143@smp.belajar.id","VENNY AZZAHRA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ahmadmurobbi60@smp.belajar.id","AHMAD MUROBBI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["khaerul.abror55@smp.belajar.id","KHAERUL ABROR","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["m.rizki85048@smp.belajar.id","M.RIZKI ALGHIPARI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["gilang8988@smp.belajar.id","GILANG RAMADAN","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ery093@smp.belajar.id","ERY KUSMAYADI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["dina.nika36@smp.belajar.id","DINA NIKA APRILIA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["malhuzaevi13@smp.belajar.id","M RIZALDI ALHUZAEVI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["fatihin081@smp.belajar.id","FATIHIN AHMAD","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["tina.septiana121@smp.belajar.id","TINA SEPTIANA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["husnul1619@smp.belajar.id","HUSNUL WARDIAH","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["mohnazil77@smp.belajar.id","MOH HERU NAZIL","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["maysa.putri874@smp.belajar.id","MAYSA PUTRI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["handayani30@smp.belajar.id","HANDAYANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["hilma.cahyani79@smp.belajar.id","HILMA CAHYANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["haerurrozikin.95@smp.belajar.id","HAERUR ROZIKIN","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muhammad.rangga1442@smp.belajar.id","MUHAMMAD RANGGA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ratnaaulia17@smp.belajar.id","RATNA AULIA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["askinarosada53@smp.belajar.id","ASKINA ROSADA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["febriayanti42@smp.belajar.id","PEBRIYANTI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["mayra.78@smp.belajar.id","MAYRA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["mwarisin89@smp.belajar.id","MUH KHAIRUL WARISIN","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["unwanziyadi59@smp.belajar.id","UNWAN ZIYADI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["naufal.alib32@smp.belajar.id","NAUFAL ALIB ASADEL","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muhamad.hafizi280@smp.belajar.id","MUHAMAD HAFIZI AKBAR","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ihsan.aulawi23@smp.belajar.id","IHSAN AULAWI PUTRA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muliardi.19@smp.belajar.id","MULIARDI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["abdurrazak.232@smp.belajar.id","ABDURRAZAK","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["haril943@smp.belajar.id","HARIL SETIA PRATAMA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["egi.hamzani33@smp.belajar.id","EGI HAMZANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muh.najmul65@smp.belajar.id","MUH. NAJMUL PAHRI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["endri.alanwari4@smp.belajar.id","ENDRI ALANWARI SAPUTRA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["silna.paradisa125@smp.belajar.id","SILNA PARADISA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["arya.saputra24672@smp.belajar.id","ARYA SAPUTRA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["mia.mawantini39@smp.belajar.id","MIA MAWANTINI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["nuzila.okta10@smp.belajar.id","Nuzila Okta Resyia","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muhammad.alpiansyah958@smp.belajar.id","MUHAMMAD ALPIANSYAH","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["sirul261@smp.belajar.id","SIRUL HAYATI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["isfha.nurhasanah43@smp.belajar.id","ISFHA NURHASANAH","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["mila.susanti642@smp.belajar.id","MILA SUSANTI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["fanesya.salsabila37@smp.belajar.id","FANESYA SALSABILA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["m.padi11@smp.belajar.id","M. PADI ZAENUL HASANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["jwita.sintiani45@smp.belajar.id","JUWITA SINTIANI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["muhammad.irsan4756@smp.belajar.id","Muhammad Irsan","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["izatul.aulia115@smp.belajar.id","IZATUL AULIA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["nisa3733@smp.belajar.id","NISA SAFIKA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["akbar.ngabalin13@smp.belajar.id","AKBAR NGABALIN","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["zuanda.almayda49@smp.belajar.id","ZUANDA ALMAYDA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["maula337@smp.belajar.id","MAULA ASROINI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["dimas.alfarizi1467@smp.belajar.id","DIMAS ALFARIZI","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["reza.ikhtiar30@smp.belajar.id","Reza Ikhtiar","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["nurhizatul.nadia40@smp.belajar.id","NURHIZATUL NADIA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["izzatul.hasanah177@smp.belajar.id","IZZATUL HASANAH","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["nazima871@smp.belajar.id","NAZIMA WAHIDA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["sazkia44@smp.belajar.id","SAZKIA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["allifa.ma16@smp.belajar.id","ALLIFA MA'RIFATUSSOFIA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["ahmad.hairul556@smp.belajar.id","Ahmad Hairul Hasby","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"],
+  ["marya.ulfa874@smp.belajar.id","MARYA ULFA","SMP","Status: Siswa SMP Islam NW Kumbung","SISWA"]
+];
+
+// Database Persuratan murni kosong agar seluruh SK, Surat Masuk, dan Surat Keluar diisi manual oleh pengguna
+const DEFAULT_SURAT = [];
+
+let DATA = [];
+let DATA_SURAT = [];
+let isAdmin = false;
+let currentModule = "DATA"; // 'DATA' | 'SURAT'
+let selectedLembaga = "ALL";
+let selectedStatus = "ALL";
+let selectedSuratLembaga = "ALL";
+let selectedSuratTipe = "ALL";
+let onConfirmAction = null;
+
+function muatData(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) {
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length > 0) {
+        DATA = parsed;
+      } else {
+        DATA = JSON.parse(JSON.stringify(DEFAULT_DATABASE));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
+      }
+    } else {
+      DATA = JSON.parse(JSON.stringify(DEFAULT_DATABASE));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
+    }
+  } catch(e) {
+    DATA = JSON.parse(JSON.stringify(DEFAULT_DATABASE));
+  }
+
+  // Muat Data Surat
+  try {
+    const rawSurat = localStorage.getItem(STORAGE_SURAT_KEY);
+    if(rawSurat) {
+      const parsedSurat = JSON.parse(rawSurat);
+      if(Array.isArray(parsedSurat) && parsedSurat.length > 0) {
+        DATA_SURAT = parsedSurat;
+      } else {
+        DATA_SURAT = JSON.parse(JSON.stringify(DEFAULT_SURAT));
+        localStorage.setItem(STORAGE_SURAT_KEY, JSON.stringify(DATA_SURAT));
+      }
+    } else {
+      DATA_SURAT = JSON.parse(JSON.stringify(DEFAULT_SURAT));
+      localStorage.setItem(STORAGE_SURAT_KEY, JSON.stringify(DATA_SURAT));
+    }
+  } catch(e) {
+    DATA_SURAT = JSON.parse(JSON.stringify(DEFAULT_SURAT));
+  }
+}
+
+function simpanDataPTK(){
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
+  } catch(e) {
+    tampilkanToast("⚠️ Gagal menyimpan ke penyimpanan lokal.");
+  }
+}
+
+function simpanDataSurat(){
+  try {
+    localStorage.setItem(STORAGE_SURAT_KEY, JSON.stringify(DATA_SURAT));
+  } catch(e) {
+    tampilkanToast("⚠️ Gagal menyimpan data surat.");
+  }
+}
+
+// Elemen Navigasi Modul
+const tabNavData = document.getElementById("tabNavData");
+const tabNavSurat = document.getElementById("tabNavSurat");
+const modulDataSekolah = document.getElementById("modulDataSekolah");
+const modulPersuratan = document.getElementById("modulPersuratan");
+
+// Elemen Modul Khusus Upload Siswa
+const tabNavUploadSiswa = document.getElementById("tabNavUploadSiswa");
+const modulUploadSiswa = document.getElementById("modulUploadSiswa");
+const selModulLembaga = document.getElementById("selModulLembaga");
+const selModulStatus = document.getElementById("selModulStatus");
+const btnMetodePaste = document.getElementById("btnMetodePaste");
+const btnMetodeFile = document.getElementById("btnMetodeFile");
+const btnMetodeManual = document.getElementById("btnMetodeManual");
+const areaMetodePaste = document.getElementById("areaMetodePaste");
+const areaMetodeFile = document.getElementById("areaMetodeFile");
+const areaMetodeManual = document.getElementById("areaMetodeManual");
+const modulPasteTextarea = document.getElementById("modulPasteTextarea");
+const labelHitungDeteksi = document.getElementById("labelHitungDeteksi");
+const btnEksekusiUploadPaste = document.getElementById("btnEksekusiUploadPaste");
+const dropAreaModulUpload = document.getElementById("dropAreaModulUpload");
+const fileCsvModulInput = document.getElementById("fileCsvModulInput");
+const fileInfoLabel = document.getElementById("fileInfoLabel");
+const btnEksekusiUploadFile = document.getElementById("btnEksekusiUploadFile");
+const formUploadSatuan = document.getElementById("formUploadSatuan");
+const manualNamaSiswa = document.getElementById("manualNamaSiswa");
+const manualNisnSiswa = document.getElementById("manualNisnSiswa");
+const manualKeteranganSiswa = document.getElementById("manualKeteranganSiswa");
+const manualEmailSiswa = document.getElementById("manualEmailSiswa");
+const btnDownloadTemplateMenu = document.getElementById("btnDownloadTemplateMenu");
+const judulTabelStatusSiswa = document.getElementById("judulTabelStatusSiswa");
+const subJudulTabelStatusSiswa = document.getElementById("subJudulTabelStatusSiswa");
+const cariTabelStatusSiswa = document.getElementById("cariTabelStatusSiswa");
+const isiTabelStatusSiswa = document.getElementById("isiTabelStatusSiswa");
+const btnEksporStatusSiswa = document.getElementById("btnEksporStatusSiswa");
+
+let fileModulContent = "";
+
+// Elemen PTK/Siswa
+const namaInput = document.getElementById("nama");
+const btnCari = document.getElementById("btnCari");
+const btnReset = document.getElementById("btnReset");
+const hasil = document.getElementById("hasil");
+const statusMsg = document.getElementById("statusMsg");
+const jumlahData = document.getElementById("jumlahData");
+const jumlahHasil = document.getElementById("jumlahHasil");
+const tabButtons = document.querySelectorAll("#kategoriList .tab-btn");
+const chipButtons = document.querySelectorAll("#statusChipsList .chip-btn");
+
+// Elemen Persuratan
+const inputCariSurat = document.getElementById("inputCariSurat");
+const btnCariSurat = document.getElementById("btnCariSurat");
+const btnResetSurat = document.getElementById("btnResetSurat");
+const hasilSurat = document.getElementById("hasilSurat");
+const statusMsgSurat = document.getElementById("statusMsgSurat");
+const jumlahDataSurat = document.getElementById("jumlahDataSurat");
+const jumlahHasilSurat = document.getElementById("jumlahHasilSurat");
+const tabSuratButtons = document.querySelectorAll("#kategoriSuratList .tab-btn");
+const chipSuratButtons = document.querySelectorAll("#tipeSuratChips .chip-btn");
+
+// Elemen Admin & Panel
+const btnToggleAdmin = document.getElementById("btnToggleAdmin");
+const adminPanelBar = document.getElementById("adminPanelBar");
+const adminPanelSurat = document.getElementById("adminPanelSurat");
+const btnTambahBaru = document.getElementById("btnTambahBaru");
+const btnResetDefault = document.getElementById("btnResetDefault");
+const btnUploadStatusSiswa = document.getElementById("btnUploadStatusSiswa");
+const btnImportCepat = document.getElementById("btnImportCepat");
+const btnEksporCSV = document.getElementById("btnEksporCSV");
+
+// Admin Surat Elements
+const btnTambahSurat = document.getElementById("btnTambahSurat");
+const btnImportSurat = document.getElementById("btnImportSurat");
+const btnEksporSurat = document.getElementById("btnEksporSurat");
+const btnTemplateSurat = document.getElementById("btnTemplateSurat");
+
+// Elemen Form Input Manual Langsung Persuratan
+const formManualSuratDirect = document.getElementById("formManualSuratDirect");
+const directSuratTipe = document.getElementById("directSuratTipe");
+const directSuratLembaga = document.getElementById("directSuratLembaga");
+const directSuratTanggal = document.getElementById("directSuratTanggal");
+const directSuratSifat = document.getElementById("directSuratSifat");
+const directSuratNomor = document.getElementById("directSuratNomor");
+const directSuratPihak = document.getElementById("directSuratPihak");
+const labelDirectSuratPihak = document.getElementById("labelDirectSuratPihak");
+const directSuratPerihal = document.getElementById("directSuratPerihal");
+const directSuratBerkas = document.getElementById("directSuratBerkas");
+
+// Modal Surat
+const modalSuratForm = document.getElementById("modalSuratForm");
+const modalSuratTitle = document.getElementById("modalSuratTitle");
+const suratForm = document.getElementById("suratForm");
+const formSuratIndex = document.getElementById("formSuratIndex");
+const formSuratTipe = document.getElementById("formSuratTipe");
+const formSuratLembaga = document.getElementById("formSuratLembaga");
+const formSuratNomor = document.getElementById("formSuratNomor");
+const formSuratTanggal = document.getElementById("formSuratTanggal");
+const formSuratSifat = document.getElementById("formSuratSifat");
+const formSuratPihak = document.getElementById("formSuratPihak");
+const labelSuratPihak = document.getElementById("labelSuratPihak");
+const formSuratPerihal = document.getElementById("formSuratPerihal");
+const formSuratBerkas = document.getElementById("formSuratBerkas");
+const btnBatalSuratForm = document.getElementById("btnBatalSuratForm");
+
+// Modal Import Surat
+const modalImportSurat = document.getElementById("modalImportSurat");
+const dropAreaSurat = document.getElementById("dropAreaSurat");
+const fileCsvSuratInput = document.getElementById("fileCsvSuratInput");
+const pasteCsvSuratInput = document.getElementById("pasteCsvSuratInput");
+const previewCountSuratLabel = document.getElementById("previewCountSuratLabel");
+const btnBatalImportSurat = document.getElementById("btnBatalImportSurat");
+const btnProsesImportSurat = document.getElementById("btnProsesImportSurat");
+
+// Modal Elements PTK / Siswa
+const modalForm = document.getElementById("modalForm");
+const modalTitle = document.getElementById("modalTitle");
+const ptkForm = document.getElementById("ptkForm");
+const formIndex = document.getElementById("formIndex");
+const formNama = document.getElementById("formNama");
+const formKategori = document.getElementById("formKategori");
+const formStatus = document.getElementById("formStatus");
+const formEmail = document.getElementById("formEmail");
+const formDetail = document.getElementById("formDetail");
+const btnBatalForm = document.getElementById("btnBatalForm");
+
+// Modal Upload Status Siswa
+const modalUploadStatus = document.getElementById("modalUploadStatus");
+const uploadTargetLembaga = document.getElementById("uploadTargetLembaga");
+const uploadTargetStatus = document.getElementById("uploadTargetStatus");
+const btnDownloadTemplateStatus = document.getElementById("btnDownloadTemplateStatus");
+const dropAreaStatus = document.getElementById("dropAreaStatus");
+const fileCsvStatusInput = document.getElementById("fileCsvStatusInput");
+const pasteCsvStatusInput = document.getElementById("pasteCsvStatusInput");
+const previewCountStatusLabel = document.getElementById("previewCountStatusLabel");
+const btnBatalUploadStatus = document.getElementById("btnBatalUploadStatus");
+const btnProsesUploadStatus = document.getElementById("btnProsesUploadStatus");
+
+// Confirm Modal & Toast
+const modalConfirm = document.getElementById("modalConfirm");
+const confirmTitle = document.getElementById("confirmTitle");
+const confirmMessage = document.getElementById("confirmMessage");
+const btnBatalConfirm = document.getElementById("btnBatalConfirm");
+const btnYaConfirm = document.getElementById("btnYaConfirm");
+const toastBox = document.getElementById("toastBox");
+
+// Modal Password Admin
+const modalAdminAuth = document.getElementById("modalAdminAuth");
+const adminAuthForm = document.getElementById("adminAuthForm");
+const adminPasswordInput = document.getElementById("adminPasswordInput");
+const authErrorMsg = document.getElementById("authErrorMsg");
+const btnBatalAuth = document.getElementById("btnBatalAuth");
+
+// Modal Impor CSV / Excel Umum
+const modalImport = document.getElementById("modalImport");
+const btnBatalImport = document.getElementById("btnBatalImport");
+const btnProsesImport = document.getElementById("btnProsesImport");
+const dropArea = document.getElementById("dropArea");
+const fileCsvInput = document.getElementById("fileCsvInput");
+const pasteCsvInput = document.getElementById("pasteCsvInput");
+const previewCountLabel = document.getElementById("previewCountLabel");
+
+function tampilkanToast(pesan){
+  toastBox.textContent = pesan;
+  toastBox.style.display = "block";
+  clearTimeout(toastBox._timer);
+  toastBox._timer = setTimeout(function(){
+    toastBox.style.display = "none";
+  }, 2600);
+}
+
+function bukaKonfirmasi(judul, pesan, onSetuju){
+  confirmTitle.textContent = judul;
+  confirmMessage.textContent = pesan;
+  onConfirmAction = onSetuju;
+  modalConfirm.classList.add("open");
+}
+
+function tutupKonfirmasi(){
+  modalConfirm.classList.remove("open");
+  onConfirmAction = null;
+}
+
+btnBatalConfirm.addEventListener("click", tutupKonfirmasi);
+btnYaConfirm.addEventListener("click", function(){
+  if(typeof onConfirmAction === "function") {
+    onConfirmAction();
+  }
+  tutupKonfirmasi();
+});
+
+function normalisasi(teks){
+  return String(teks||"")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .toUpperCase()
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function escapeHTML(teks){
+  return String(teks).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c];
+  });
+}
+
+function salinTeks(teks){
+  const el = document.createElement("textarea");
+  el.value = teks;
+  el.setAttribute("readonly", "");
+  el.style.position = "absolute";
+  el.style.left = "-9999px";
+  document.body.appendChild(el);
+  el.select();
+  try {
+    document.execCommand("copy");
+    tampilkanToast("📋 Disalin: " + teks);
+  } catch(err) {
+    tampilkanToast("⚠️ Gagal menyalin.");
+  }
+  document.body.removeChild(el);
+}
+
+function getBadgeStatusInfo(statusKey){
+  const k = String(statusKey || "").toUpperCase();
+  if(k === "LULUS") return { label: "🎓 Siswa Lulus", css: "lulus" };
+  if(k === "MUTASI") return { label: "🔄 Mutasi / Pindah", css: "mutasi" };
+  if(k === "BERHENTI") return { label: "⛔ Siswa Berhenti", css: "berhenti" };
+  if(k === "PTK") return { label: "👨‍‍🏫 Guru / PTK", css: "ptk" };
+  return { label: "🎒 Siswa Aktif", css: "siswa" };
+}
+
+function getNamaLembagaLengkap(kode){
+  const k = String(kode || "").toUpperCase();
+  if(k === "YAYASAN") return "🏛️ Yayasan / Pondok Pesantren";
+  if(k === "SMP") return "SMP Islam NW Kumbung";
+  if(k === "SMK") return "SMKS Al-Mujahidin NW";
+  if(k === "TK") return "TK Al-Mujahidin NW";
+  if(k === "MI") return "MI Al-Mujahidin NW";
+  return kode;
+}
+
+function switchModule(mod){
+  currentModule = mod;
+  tabNavData.classList.toggle("active", mod === "DATA");
+  tabNavUploadSiswa.classList.toggle("active", mod === "UPLOAD_SISWA");
+  tabNavSurat.classList.toggle("active", mod === "SURAT");
+
+  modulDataSekolah.style.display = (mod === "DATA") ? "block" : "none";
+  modulUploadSiswa.style.display = (mod === "UPLOAD_SISWA") ? "block" : "none";
+  modulPersuratan.style.display = (mod === "SURAT") ? "block" : "none";
+
+  if(mod === "DATA"){
+    filterDanCariData(Boolean(namaInput.value.trim()));
+  } else if(mod === "UPLOAD_SISWA"){
+    muatTabelStatusSiswa();
+  } else {
+    filterDanCariSurat(Boolean(inputCariSurat.value.trim()));
+  }
+}
+
+tabNavData.addEventListener("click", function(){ switchModule("DATA"); });
+tabNavUploadSiswa.addEventListener("click", function(){ switchModule("UPLOAD_SISWA"); });
+tabNavSurat.addEventListener("click", function(){ switchModule("SURAT"); });
+
+// Pengalih Metode Input di Modul Upload Siswa
+function setMetodeUpload(metode){
+  btnMetodePaste.classList.toggle("active", metode === "PASTE");
+  btnMetodeFile.classList.toggle("active", metode === "FILE");
+  btnMetodeManual.classList.toggle("active", metode === "MANUAL");
+
+  areaMetodePaste.style.display = (metode === "PASTE") ? "block" : "none";
+  areaMetodeFile.style.display = (metode === "FILE") ? "block" : "none";
+  areaMetodeManual.style.display = (metode === "MANUAL") ? "block" : "none";
+}
+
+btnMetodePaste.addEventListener("click", function(){ setMetodeUpload("PASTE"); });
+btnMetodeFile.addEventListener("click", function(){ setMetodeUpload("FILE"); });
+btnMetodeManual.addEventListener("click", function(){ setMetodeUpload("MANUAL"); });
+
+// Deteksi otomatis baris teks di textarea modul upload
+modulPasteTextarea.addEventListener("input", function(){
+  const rows = parseStatusCsv(this.value, selModulLembaga.value, selModulStatus.value);
+  labelHitungDeteksi.textContent = rows.length + " data siswa terdeteksi";
+});
+
+// Eksekusi Simpan dari Paste Excel
+btnEksekusiUploadPaste.addEventListener("click", function(){
+  const rows = parseStatusCsv(modulPasteTextarea.value, selModulLembaga.value, selModulStatus.value);
+  if(!rows.length){
+    tampilkanToast("⚠️ Tidak ada data siswa yang terbaca untuk disimpan.");
+    return;
+  }
+  DATA = rows.concat(DATA);
+  simpanDataPTK();
+  updateTampilanTotal();
+  modulPasteTextarea.value = "";
+  labelHitungDeteksi.textContent = "0 data siswa terdeteksi";
+  muatTabelStatusSiswa();
+  tampilkanToast("✅ Berhasil menambahkan " + rows.length + " siswa " + getBadgeStatusInfo(selModulStatus.value).label + " ke " + selModulLembaga.value + "!");
+});
+
+// Drag & Drop / Pilih File CSV di Modul Upload
+dropAreaModulUpload.addEventListener("click", function(){ fileCsvModulInput.click(); });
+fileCsvModulInput.addEventListener("change", function(e){
+  if(e.target.files.length){
+    const f = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(evt){
+      fileModulContent = evt.target.result;
+      const rows = parseStatusCsv(fileModulContent, selModulLembaga.value, selModulStatus.value);
+      fileInfoLabel.textContent = "📄 Berkas terpilih: " + f.name + " (" + rows.length + " siswa terdeteksi)";
+      fileInfoLabel.style.display = "block";
+      btnEksekusiUploadFile.disabled = rows.length === 0;
+    };
+    reader.readAsText(f);
+  }
+});
+
+btnEksekusiUploadFile.addEventListener("click", function(){
+  const rows = parseStatusCsv(fileModulContent, selModulLembaga.value, selModulStatus.value);
+  if(!rows.length){
+    tampilkanToast("⚠️ Berkas tidak memuat data yang valid.");
+    return;
+  }
+  DATA = rows.concat(DATA);
+  simpanDataPTK();
+  updateTampilanTotal();
+  fileModulContent = "";
+  fileInfoLabel.style.display = "none";
+  fileCsvModulInput.value = "";
+  btnEksekusiUploadFile.disabled = true;
+  muatTabelStatusSiswa();
+  tampilkanToast("✅ Berhasil mengimpor " + rows.length + " siswa!");
+});
+
+// Submit Form Input Manual Satuan
+formUploadSatuan.addEventListener("submit", function(e){
+  e.preventDefault();
+  const nama = manualNamaSiswa.value.trim();
+  const nisn = manualNisnSiswa.value.trim();
+  const ket = manualKeteranganSiswa.value.trim();
+  const email = manualEmailSiswa.value.trim() || "-";
+  const lembaga = selModulLembaga.value;
+  const statusVal = selModulStatus.value;
+
+  if(!nama){
+    tampilkanToast("⚠️ Nama siswa wajib diisi!");
+    return;
+  }
+
+  let detailParts = [];
+  if(nisn) detailParts.push(nisn);
+  if(ket) detailParts.push(ket);
+  if(!detailParts.length) detailParts.push("Status: " + getBadgeStatusInfo(statusVal).label);
+
+  DATA.unshift([email, nama, lembaga, detailParts.join(" | "), statusVal]);
+  simpanDataPTK();
+  updateTampilanTotal();
+  formUploadSatuan.reset();
+  muatTabelStatusSiswa();
+  tampilkanToast("✅ Siswa " + nama + " berhasil dicatat ke " + lembaga + "!");
+});
+
+// Download Template dari tombol menu
+btnDownloadTemplateMenu.addEventListener("click", function(){
+  btnDownloadTemplateStatus.click();
+});
+
+// Render Tabel Riwayat Siswa di Modul Upload
+function muatTabelStatusSiswa(){
+  const targetLembaga = selModulLembaga.value;
+  const targetStatus = selModulStatus.value;
+  const queryFilter = normalisasi(cariTabelStatusSiswa.value);
+
+  const statusInfo = getBadgeStatusInfo(targetStatus);
+  judulTabelStatusSiswa.textContent = "Daftar " + statusInfo.label + " - " + getNamaLembagaLengkap(targetLembaga);
+  subJudulTabelStatusSiswa.textContent = "Menampilkan siswa berstatus " + targetStatus + " pada lembaga " + targetLembaga;
+
+  isiTabelStatusSiswa.innerHTML = "";
+
+  const filtered = [];
+  for(let i = 0; i < DATA.length; i++){
+    const item = DATA[i];
+    const itemLembaga = String(item[2] || "").toUpperCase();
+    const itemStatus = String(item[4] || "PTK").toUpperCase();
+
+    if(itemLembaga === targetLembaga && itemStatus === targetStatus){
+      if(!queryFilter || normalisasi(item[1]).includes(queryFilter) || normalisasi(item[3]).includes(queryFilter)){
+        filtered.push({ data: item, realIndex: i });
+      }
+    }
+  }
+
+  if(!filtered.length){
+    isiTabelStatusSiswa.innerHTML = 
+      '<tr><td colspan="7" style="text-align:center;color:#64748b;padding:28px;">' +
+      'Belum ada siswa ' + statusInfo.label + ' yang tercatat untuk lembaga ' + targetLembaga + '.' +
+      '</td></tr>';
+    return;
+  }
+
+  filtered.forEach(function(entry, idx){
+    const row = document.createElement("tr");
+    const item = entry.data;
+    const realIdx = entry.realIndex;
+
+    const emailDisplay = (item[0] && item[0] !== "-") ? escapeHTML(item[0]) : '<span style="color:#94a3b8;">-</span>';
+    const statusClass = targetStatus.toLowerCase();
+
+    row.innerHTML = 
+      '<td>' + (idx + 1) + '</td>' +
+      '<td><b>' + escapeHTML(item[1]) + '</b></td>' +
+      '<td><span class="badge ' + targetLembaga.toLowerCase() + '">' + targetLembaga + '</span></td>' +
+      '<td><span class="status-pill ' + statusClass + '">' + statusInfo.label + '</span></td>' +
+      '<td style="font-size:12px;color:#475467;">' + escapeHTML(item[3] || "-") + '</td>' +
+      '<td style="font-size:12px;font-family:monospace;color:#1e40af;">' + emailDisplay + '</td>' +
+      '<td style="text-align:center;white-space:nowrap;">' +
+        '<button type="button" class="btn-action-edit btn-tabel-edit" data-idx="' + realIdx + '" style="margin-right:4px;">✏️</button>' +
+        '<button type="button" class="btn-action-delete btn-tabel-del" data-idx="' + realIdx + '">🗑️</button>' +
+      '</td>';
+
+    isiTabelStatusSiswa.appendChild(row);
+  });
+
+  isiTabelStatusSiswa.querySelectorAll(".btn-tabel-edit").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      bukaModalEditData(parseInt(this.dataset.idx, 10));
+    });
+  });
+
+  isiTabelStatusSiswa.querySelectorAll(".btn-tabel-del").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      const idx = parseInt(this.dataset.idx, 10);
+      const target = DATA[idx];
+      if(!target) return;
+      bukaKonfirmasi("Hapus Siswa", 'Hapus data siswa "' + target[1] + '"?', function(){
+        DATA.splice(idx, 1);
+        simpanDataPTK();
+        updateTampilanTotal();
+        muatTabelStatusSiswa();
+        tampilkanToast("🗑️ Siswa berhasil dihapus.");
+      });
+    });
+  });
+}
+
+// Event listener pilihan lembaga dan status di Modul Upload
+selModulLembaga.addEventListener("change", function(){
+  modulPasteTextarea.dispatchEvent(new Event("input"));
+  muatTabelStatusSiswa();
+});
+selModulStatus.addEventListener("change", function(){
+  modulPasteTextarea.dispatchEvent(new Event("input"));
+  muatTabelStatusSiswa();
+});
+cariTabelStatusSiswa.addEventListener("input", muatTabelStatusSiswa);
+
+// Ekspor Khusus Data Status Siswa yang Terfilter
+btnEksporStatusSiswa.addEventListener("click", function(){
+  const targetLembaga = selModulLembaga.value;
+  const targetStatus = selModulStatus.value;
+  const filtered = DATA.filter(item => String(item[2]).toUpperCase() === targetLembaga && String(item[4]).toUpperCase() === targetStatus);
+
+  if(!filtered.length){
+    tampilkanToast("⚠️ Tidak ada data untuk diekspor pada filter ini.");
+    return;
+  }
+
+  let csv = "Nama Siswa,Lembaga,Status,NISN / Keterangan,Akun Belajar ID\r\n";
+  filtered.forEach(row => {
+    csv += [
+      '"' + String(row[1] || "").replace(/"/g, '""') + '"',
+      '"' + String(row[2] || "").replace(/"/g, '""') + '"',
+      '"' + String(row[4] || "").replace(/"/g, '""') + '"',
+      '"' + String(row[3] || "").replace(/"/g, '""') + '"',
+      '"' + String(row[0] || "").replace(/"/g, '""') + '"'
+    ].join(",") + "\r\n";
+  });
+
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "data_siswa_" + targetStatus.toLowerCase() + "_" + targetLembaga.toLowerCase() + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  tampilkanToast("📥 Berhasil mengekspor " + filtered.length + " data siswa.");
+});
+
+function renderDataPTK(dataList, isSearching) {
+  hasil.innerHTML = "";
+  
+  if (!isSearching) {
+    statusMsg.hidden = true;
+    hasil.innerHTML = '<div class="empty">🔍 <b>Pencarian PTK & Siswa Siap Digunakan</b><br>Silakan ketik nama, NUPTK, NIK, NISN, atau akun belajar.id pada kolom pencarian di atas untuk menampilkan data.</div>';
+    jumlahHasil.textContent = "";
+    return;
+  }
+
+  if (!dataList.length) {
+    statusMsg.hidden = false;
+    statusMsg.textContent = "Data tidak ditemukan.";
+    hasil.innerHTML = '<div class="empty">❌ Tidak ada hasil yang cocok dengan kriteria pencarian.<br>Periksa kembali ejaan kata kunci atau pilihan lembaga dan status di atas.</div>';
+    jumlahHasil.textContent = "0 hasil";
+    return;
+  }
+
+  statusMsg.hidden = false;
+  statusMsg.textContent = 'Ditemukan ' + dataList.length + ' data yang sesuai.';
+  jumlahHasil.textContent = dataList.length + " hasil";
+
+  dataList.forEach(function(item, index){
+    const div = document.createElement("div");
+    div.className = "result" + (isAdmin ? " admin-mode" : "");
+
+    const lembagaCode = String(item[2] || "").toUpperCase();
+    const statusCode = String(item[4] || "PTK").toUpperCase();
+    const badgeStatusObj = getBadgeStatusInfo(statusCode);
+    
+    let emailInfo = '';
+    if(item[0] && item[0] !== "-") {
+      emailInfo = 
+        '<div class="email-box">' +
+          '<span class="email-text">📧 ' + escapeHTML(item[0]) + '</span>' +
+          '<button type="button" class="btn-copy" data-copy="' + escapeHTML(item[0]) + '">Salin Akun</button>' +
+        '</div>';
+    }
+      
+    const detailInfo = item[3] ? '<div class="detail">' + escapeHTML(item[3]) + '</div>' : '';
+
+    const actionsHTML = 
+      '<div class="item-actions">' +
+        '<button type="button" class="btn-action-edit btn-edit-data" data-idx="' + item._realIndex + '">✏️ Edit</button>' +
+        '<button type="button" class="btn-action-delete btn-del-data" data-idx="' + item._realIndex + '">🗑️ Hapus</button>' +
+      '</div>';
+
+    div.innerHTML = 
+      '<div class="result-header">' +
+        '<div class="name">' + escapeHTML(item[1]) + '</div>' +
+        '<div class="badges-container">' +
+          '<span class="badge ' + lembagaCode.toLowerCase() + '">' + lembagaCode + '</span>' +
+          '<span class="badge-status ' + badgeStatusObj.css + '">' + badgeStatusObj.label + '</span>' +
+        '</div>' +
+      '</div>' +
+      detailInfo +
+      emailInfo +
+      '<span class="num">Nomor urut: ' + (index + 1) + '</span>' +
+      actionsHTML;
+
+    hasil.appendChild(div);
+  });
+
+  hasil.querySelectorAll(".btn-copy").forEach(function(btn){
+    btn.addEventListener("click", function(){ salinTeks(this.dataset.copy); });
+  });
+
+  if(isAdmin){
+    hasil.querySelectorAll(".btn-edit-data").forEach(function(btn){
+      btn.addEventListener("click", function(){ bukaModalEditData(parseInt(this.dataset.idx, 10)); });
+    });
+
+    hasil.querySelectorAll(".btn-del-data").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        const idx = parseInt(this.dataset.idx, 10);
+        const target = DATA[idx];
+        if(!target) return;
+        bukaKonfirmasi("Hapus Data", 'Hapus data "' + target[1] + '" dari sistem?', function(){
+          DATA.splice(idx, 1);
+          simpanDataPTK();
+          tampilkanToast("🗑️ Data berhasil dihapus.");
+          updateTampilanTotal();
+          filterDanCariData(Boolean(namaInput.value.trim()));
+        });
+      });
+    });
+  }
+}
+
+function filterDanCariData(isExplicitSearch){
+  const q = normalisasi(namaInput.value);
+
+  if(!q){
+    if(isExplicitSearch){
+      statusMsg.hidden = false;
+      statusMsg.textContent = "Silakan ketik kata kunci pencarian terlebih dahulu.";
+    } else {
+      statusMsg.hidden = true;
+    }
+    renderDataPTK([], false);
+    return;
+  }
+
+  const hasilFilter = [];
+  for(let i = 0; i < DATA.length; i++){
+    const item = DATA[i];
+    const itemWithIdx = [item[0], item[1], item[2], item[3], item[4] || "PTK"];
+    itemWithIdx._realIndex = i;
+
+    const cocokLembaga = (selectedLembaga === "ALL" || item[2] === selectedLembaga);
+    const itemStatus = String(item[4] || "PTK").toUpperCase();
+    const cocokStatus = (selectedStatus === "ALL" || itemStatus === selectedStatus);
+
+    const cocokPencarian = normalisasi(item[1]).includes(q) 
+      || (item[0] && normalisasi(item[0]).includes(q))
+      || (item[3] && normalisasi(item[3]).includes(q));
+
+    if(cocokLembaga && cocokStatus && cocokPencarian){
+      hasilFilter.push(itemWithIdx);
+    }
+  }
+
+  renderDataPTK(hasilFilter, true);
+}
+
+function renderSurat(listSurat, isSearching){
+  hasilSurat.innerHTML = "";
+
+  if(!listSurat.length){
+    statusMsgSurat.hidden = false;
+    statusMsgSurat.textContent = "Belum ada agenda surat / SK yang tercatat.";
+    hasilSurat.innerHTML = '<div class="empty">📑 Belum ada agenda Surat atau SK yang tercatat.<br>Gunakan formulir manual di atas untuk mulai mencatat SK, Surat Masuk, atau Surat Keluar.</div>';
+    jumlahHasilSurat.textContent = "0 dokumen";
+    return;
+  }
+
+  statusMsgSurat.hidden = false;
+  statusMsgSurat.textContent = 'Ditemukan ' + listSurat.length + ' dokumen persuratan.';
+  jumlahHasilSurat.textContent = listSurat.length + " dokumen";
+
+  listSurat.forEach(function(item, index){
+    const div = document.createElement("div");
+    div.className = "result" + (isAdmin ? " admin-mode" : "");
+
+    let badgeTipe = '';
+    let labelPihak = '';
+    if(item.tipe === "MASUK"){
+      badgeTipe = '<span class="badge-surat masuk">📥 Surat Masuk</span>';
+      labelPihak = 'Pengirim (Asal)';
+    } else if(item.tipe === "KELUAR"){
+      badgeTipe = '<span class="badge-surat keluar">📤 Surat Keluar</span>';
+      labelPihak = 'Tujuan (Penerima)';
+    } else {
+      badgeTipe = '<span class="badge-surat sk">📜 Surat Keputusan (SK)</span>';
+      labelPihak = 'Penetap / Pengesah';
+    }
+
+    const lembagaClass = item.lembaga.toLowerCase();
+    const lembagaBadge = '<span class="badge ' + lembagaClass + '">' + getNamaLembagaLengkap(item.lembaga) + '</span>';
+
+    let sifatCss = "";
+    const sLower = String(item.sifat || "").toLowerCase();
+    if(sLower.includes("penting") || sLower.includes("rahasia")) sifatCss = "penting";
+    else if(sLower.includes("undangan")) sifatCss = "undangan";
+    else if(sLower.includes("sk")) sifatCss = "sk";
+
+    const badgeSifat = '<span class="badge-sifat ' + sifatCss + '">' + escapeHTML(item.sifat || "Biasa") + '</span>';
+
+    const berkasInfo = item.berkas 
+      ? '<div style="font-size:12px;color:#64748b;margin-top:6px;">📁 <b>Lokasi / Berkas:</b> ' + escapeHTML(item.berkas) + '</div>' 
+      : '';
+
+    const actionsHTML = 
+      '<div class="item-actions">' +
+        '<button type="button" class="btn-action-edit btn-edit-surat" data-id="' + item.id + '">✏️ Edit</button>' +
+        '<button type="button" class="btn-action-delete btn-del-surat" data-id="' + item.id + '">🗑️ Hapus</button>' +
+      '</div>';
+
+    div.innerHTML = 
+      '<div class="result-header">' +
+        '<div class="name" style="font-size:16px;">' + escapeHTML(item.noSurat) + '</div>' +
+        '<div class="badges-container">' +
+          lembagaBadge +
+          badgeTipe +
+          badgeSifat +
+        '</div>' +
+      '</div>' +
+      '<div class="surat-meta">' +
+        '<div class="surat-meta-item">📅 <b>Tanggal:</b> ' + escapeHTML(item.tgl) + '</div>' +
+        '<div class="surat-meta-item">🏢 <b>' + labelPihak + ':</b> ' + escapeHTML(item.pihak) + '</div>' +
+      '</div>' +
+      '<div class="detail">📝 <b>Perihal / Isi Ketetapan:</b><br>' + escapeHTML(item.perihal) + '</div>' +
+      berkasInfo +
+      '<span class="num">ID Agenda: ' + escapeHTML(item.id) + ' | No. Urut: ' + (index + 1) + '</span>' +
+      actionsHTML;
+
+    hasilSurat.appendChild(div);
+  });
+
+  if(isAdmin){
+    hasilSurat.querySelectorAll(".btn-edit-surat").forEach(function(btn){
+      btn.addEventListener("click", function(){ bukaModalEditSurat(this.dataset.id); });
+    });
+
+    hasilSurat.querySelectorAll(".btn-del-surat").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        const sId = this.dataset.id;
+        const target = DATA_SURAT.find(s => s.id === sId);
+        if(!target) return;
+        bukaKonfirmasi("Hapus Agenda Surat", 'Hapus surat nomor "' + target.noSurat + '" dari pembukuan?', function(){
+          DATA_SURAT = DATA_SURAT.filter(s => s.id !== sId);
+          simpanDataSurat();
+          tampilkanToast("🗑️ Agenda surat berhasil dihapus.");
+          updateTampilanTotal();
+          filterDanCariSurat(Boolean(inputCariSurat.value.trim()));
+        });
+      });
+    });
+  }
+}
+
+function filterDanCariSurat(isSearching){
+  const q = normalisasi(inputCariSurat.value);
+
+  const hasilFilter = DATA_SURAT.filter(function(item){
+    const cocokLembaga = (selectedSuratLembaga === "ALL" || item.lembaga === selectedSuratLembaga);
+    const cocokTipe = (selectedSuratTipe === "ALL" || item.tipe === selectedSuratTipe);
+    const cocokKataKunci = !q 
+      || normalisasi(item.noSurat).includes(q)
+      || normalisasi(item.pihak).includes(q)
+      || normalisasi(item.perihal).includes(q)
+      || normalisasi(item.tgl).includes(q)
+      || normalisasi(item.sifat).includes(q);
+
+    return cocokLembaga && cocokTipe && cocokKataKunci;
+  });
+
+  renderSurat(hasilFilter, isSearching);
+}
+
+function updateTampilanTotal(){
+  jumlahData.textContent = "Total Database: " + DATA.length + " entri";
+  const totalMasuk = DATA_SURAT.filter(s => s.tipe === "MASUK").length;
+  const totalKeluar = DATA_SURAT.filter(s => s.tipe === "KELUAR").length;
+  const totalSK = DATA_SURAT.filter(s => s.tipe === "SK").length;
+  const totalYayasan = DATA_SURAT.filter(s => s.lembaga === "YAYASAN").length;
+  jumlahDataSurat.textContent = "Total Agenda: " + DATA_SURAT.length + " dokumen (📥 " + totalMasuk + " Masuk | 📤 " + totalKeluar + " Keluar | 📜 " + totalSK + " SK | 🏛️ " + totalYayasan + " Yayasan/Pondok)";
+}
+
+function bukaModalAuth(){
+  authErrorMsg.style.display = "none";
+  adminPasswordInput.value = "";
+  modalAdminAuth.classList.add("open");
+  setTimeout(function(){ adminPasswordInput.focus(); }, 100);
+}
+
+function tutupModalAuth(){
+  modalAdminAuth.classList.remove("open");
+  adminPasswordInput.value = "";
+  authErrorMsg.style.display = "none";
+}
+
+function setAdminState(aktif){
+  isAdmin = aktif;
+  if(isAdmin){
+    btnToggleAdmin.textContent = "🔒 Keluar Mode Admin";
+    btnToggleAdmin.classList.add("active");
+    adminPanelBar.classList.add("show");
+    adminPanelSurat.classList.add("show");
+    document.body.classList.add("admin-mode");
+    tampilkanToast("🔑 Mode Admin aktif. Akses terbuka.");
+  } else {
+    btnToggleAdmin.textContent = "⚙️ Mode Admin: Nonaktif";
+    btnToggleAdmin.classList.remove("active");
+    adminPanelBar.classList.remove("show");
+    adminPanelSurat.classList.remove("show");
+    document.body.classList.remove("admin-mode");
+    tampilkanToast("🔒 Berhasil keluar dari Mode Admin.");
+  }
+  if(currentModule === "DATA"){
+    filterDanCariData(Boolean(namaInput.value.trim()));
+  } else {
+    filterDanCariSurat(Boolean(inputCariSurat.value.trim()));
+  }
+}
+
+btnToggleAdmin.addEventListener("click", function(){
+  if(isAdmin) setAdminState(false);
+  else bukaModalAuth();
+});
+
+btnBatalAuth.addEventListener("click", tutupModalAuth);
+
+adminAuthForm.addEventListener("submit", function(e){
+  e.preventDefault();
+  if(adminPasswordInput.value === ADMIN_PASSWORD){
+    tutupModalAuth();
+    setAdminState(true);
+  } else {
+    authErrorMsg.style.display = "block";
+    adminPasswordInput.select();
+    tampilkanToast("❌ Kata sandi admin salah!");
+  }
+});
+
+formSuratTipe.addEventListener("change", function(){
+  if(this.value === "MASUK"){
+    labelSuratPihak.textContent = "Pengirim (Asal Surat) *";
+  } else if(this.value === "KELUAR"){
+    labelSuratPihak.textContent = "Tujuan (Penerima Surat) *";
+  } else {
+    labelSuratPihak.textContent = "Penetap / Pengesah SK (atau Ditujukan Kepada) *";
+  }
+});
+
+// Mengatur label form langsung saat tipe dokumen berubah
+if(directSuratTanggal){
+  directSuratTanggal.value = new Date().toISOString().split("T")[0];
+}
+
+directSuratTipe.addEventListener("change", function(){
+  if(this.value === "MASUK"){
+    labelDirectSuratPihak.textContent = "Pengirim (Asal Surat) *";
+    directSuratSifat.value = "Biasa";
+  } else if(this.value === "KELUAR"){
+    labelDirectSuratPihak.textContent = "Tujuan (Penerima Surat) *";
+    directSuratSifat.value = "Biasa";
+  } else {
+    labelDirectSuratPihak.textContent = "Penetap / Pengesah SK (atau Ditujukan Kepada) *";
+    directSuratSifat.value = "SK / Penetapan";
+  }
+});
+
+// Submit Formulir Manual Langsung Persuratan
+formManualSuratDirect.addEventListener("submit", function(e){
+  e.preventDefault();
+  const tipe = directSuratTipe.value;
+  const lembaga = directSuratLembaga.value;
+  const tgl = directSuratTanggal.value;
+  const sifat = directSuratSifat.value;
+  const noSurat = directSuratNomor.value.trim();
+  const pihak = directSuratPihak.value.trim();
+  const perihal = directSuratPerihal.value.trim();
+  const berkas = directSuratBerkas.value.trim();
+
+  if(!noSurat || !pihak || !perihal){
+    tampilkanToast("⚠️ Nomor surat/SK, pihak terkait, dan perihal wajib diisi!");
+    return;
+  }
+
+  const newId = "DOC-" + Date.now().toString().slice(-6);
+  DATA_SURAT.unshift({ id: newId, tipe, lembaga, noSurat, tgl, pihak, perihal, sifat, berkas });
+  simpanDataSurat();
+  updateTampilanTotal();
+
+  // Reset form kecuali lembaga
+  directSuratNomor.value = "";
+  directSuratPihak.value = "";
+  directSuratPerihal.value = "";
+  directSuratBerkas.value = "";
+
+  filterDanCariSurat(false);
+  const labelTipe = (tipe === "SK") ? "SK (Surat Keputusan)" : (tipe === "MASUK" ? "Surat Masuk" : "Surat Keluar");
+  tampilkanToast("✅ " + labelTipe + " no: " + noSurat + " berhasil disimpan manual!");
+});
+
+function bukaModalTambahSurat(){
+  modalSuratTitle.textContent = "➕ Catat Agenda Surat / SK Baru";
+  formSuratIndex.value = "-1";
+  formSuratTipe.value = "MASUK";
+  labelSuratPihak.textContent = "Pengirim (Asal Surat) *";
+  formSuratLembaga.value = (selectedSuratLembaga !== "ALL") ? selectedSuratLembaga : "YAYASAN";
+  formSuratNomor.value = "";
+  formSuratTanggal.value = new Date().toISOString().split("T")[0];
+  formSuratSifat.value = "Biasa";
+  formSuratPihak.value = "";
+  formSuratPerihal.value = "";
+  formSuratBerkas.value = "";
+  modalSuratForm.classList.add("open");
+  formSuratNomor.focus();
+}
+
+function bukaModalEditSurat(idSurat){
+  const item = DATA_SURAT.find(s => s.id === idSurat);
+  if(!item) return;
+
+  modalSuratTitle.textContent = "✏ Edit Agenda: " + item.noSurat;
+  formSuratIndex.value = item.id;
+  formSuratTipe.value = item.tipe || "MASUK";
+  if(item.tipe === "MASUK"){
+    labelSuratPihak.textContent = "Pengirim (Asal Surat) *";
+  } else if(item.tipe === "KELUAR"){
+    labelSuratPihak.textContent = "Tujuan (Penerima Surat) *";
+  } else {
+    labelSuratPihak.textContent = "Penetap / Pengesah SK (atau Ditujukan Kepada) *";
+  }
+  formSuratLembaga.value = item.lembaga || "YAYASAN";
+  formSuratNomor.value = item.noSurat || "";
+  formSuratTanggal.value = item.tgl || "";
+  formSuratSifat.value = item.sifat || "Biasa";
+  formSuratPihak.value = item.pihak || "";
+  formSuratPerihal.value = item.perihal || "";
+  formSuratBerkas.value = item.berkas || "";
+  modalSuratForm.classList.add("open");
+  formSuratNomor.focus();
+}
+
+function tutupModalSuratForm(){
+  modalSuratForm.classList.remove("open");
+}
+
+btnTambahSurat.addEventListener("click", bukaModalTambahSurat);
+btnBatalSuratForm.addEventListener("click", tutupModalSuratForm);
+
+suratForm.addEventListener("submit", function(e){
+  e.preventDefault();
+  const idSurat = formSuratIndex.value;
+  const tipe = formSuratTipe.value;
+  const lembaga = formSuratLembaga.value;
+  const noSurat = formSuratNomor.value.trim();
+  const tgl = formSuratTanggal.value;
+  const sifat = formSuratSifat.value;
+  const pihak = formSuratPihak.value.trim();
+  const perihal = formSuratPerihal.value.trim();
+  const berkas = formSuratBerkas.value.trim();
+
+  if(!noSurat || !pihak || !perihal){
+    tampilkanToast("⚠️ Nomor surat, pihak pengirim/tujuan, dan perihal wajib diisi!");
+    return;
+  }
+
+  if(idSurat && idSurat !== "-1"){
+    const idx = DATA_SURAT.findIndex(s => s.id === idSurat);
+    if(idx !== -1){
+      DATA_SURAT[idx] = { id: idSurat, tipe, lembaga, noSurat, tgl, pihak, perihal, sifat, berkas };
+      tampilkanToast("✅ Agenda surat berhasil diperbarui!");
+    }
+  } else {
+    const newId = "SRT-" + Date.now().toString().slice(-5);
+    DATA_SURAT.unshift({ id: newId, tipe, lembaga, noSurat, tgl, pihak, perihal, sifat, berkas });
+    tampilkanToast("✅ Agenda surat baru berhasil dicatat!");
+  }
+
+  simpanDataSurat();
+  updateTampilanTotal();
+  tutupModalSuratForm();
+  filterDanCariSurat(Boolean(inputCariSurat.value.trim()));
+});
+
+// Template CSV Surat
+btnTemplateSurat.addEventListener("click", function(){
+  const tmpl = 
+    "Jenis(MASUK/KELUAR),Lembaga(YAYASAN/TK/MI/SMP/SMK),Nomor Surat,Tanggal(YYYY-MM-DD),Pengirim atau Tujuan,Perihal Surat,Sifat,Lokasi Berkas\r\n" +
+    "MASUK,YAYASAN,045/Kemenag.19/2024,2024-09-10,Kemenag Kab. Lombok Timur,Monitoring Bantuan Sarpras Pesantren,Penting,Bantex Yayasan Rak 1\r\n" +
+    "KELUAR,YAYASAN,012/YAY-NW/KMB/X/2024,2024-10-02,Dinas Pendidikan Lotim,Permohonan Rekomendasi Akreditasi,Biasa,Arsip Ekspedisi 2024\r\n" +
+    "MASUK,SMP,102/Dikbud/VIII/2024,2024-08-15,Dikbud Kab. Lombok Timur,Instruksi Pelaksanaan Upacara Bendera,Biasa,File TU SMP\r\n" +
+    "KELUAR,SMK,048/SMKS-NW/TU/2024,2024-08-25,Wali Murid Kelas X SMK,Pemberitahuan Praktik Kerja Industri,Undangan,Arsip Surat SMK\r\n";
+
+  const blob = new Blob(["\uFEFF" + tmpl], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "template_agenda_surat_masuk_keluar.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  tampilkanToast("📥 Template agenda surat berhasil diunduh.");
+});
+
+// Ekspor CSV Surat
+btnEksporSurat.addEventListener("click", function(){
+  if(!DATA_SURAT.length){
+    tampilkanToast("⚠️ Belum ada data surat untuk diekspor.");
+    return;
+  }
+  let csv = "ID,Jenis,Lembaga,Nomor Surat,Tanggal,Pengirim/Tujuan,Perihal,Sifat,Berkas\r\n";
+  DATA_SURAT.forEach(s => {
+    const row = [
+      '"' + s.id + '"',
+      '"' + s.tipe + '"',
+      '"' + s.lembaga + '"',
+      '"' + s.noSurat.replace(/"/g, '""') + '"',
+      '"' + s.tgl + '"',
+      '"' + s.pihak.replace(/"/g, '""') + '"',
+      '"' + s.perihal.replace(/"/g, '""') + '"',
+      '"' + (s.sifat || "").replace(/"/g, '""') + '"',
+      '"' + (s.berkas || "").replace(/"/g, '""') + '"'
+    ];
+    csv += row.join(",") + "\r\n";
+  });
+
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "buku_agenda_surat_lengkap.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  tampilkanToast("📥 Agenda surat (" + DATA_SURAT.length + " data) berhasil diekspor.");
+});
+
+// Modal Import Surat Batch
+function bukaModalImportSurat(){
+  pasteCsvSuratInput.value = "";
+  previewCountSuratLabel.textContent = "0 baris terdeteksi";
+  modalImportSurat.classList.add("open");
+  pasteCsvSuratInput.focus();
+}
+
+function tutupModalImportSurat(){
+  modalImportSurat.classList.remove("open");
+  fileCsvSuratInput.value = "";
+}
+
+btnImportSurat.addEventListener("click", bukaModalImportSurat);
+btnBatalImportSurat.addEventListener("click", tutupModalImportSurat);
+
+dropAreaSurat.addEventListener("click", function(){ fileCsvSuratInput.click(); });
+fileCsvSuratInput.addEventListener("change", function(e){
+  if(e.target.files.length) {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(evt){
+      pasteCsvSuratInput.value = evt.target.result;
+      updateSuratPreview();
+      tampilkanToast("📄 File dimuat: " + file.name);
+    };
+    reader.readAsText(file);
+  }
+});
+
+function parseSuratCsv(text){
+  if(!text) return [];
+  const clean = text.replace(/^\uFEFF/, "");
+  const lines = clean.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const rows = [];
+
+  for(let i = 0; i < lines.length; i++){
+    const line = lines[i];
+    let delimiter = ",";
+    if(line.includes("\t")) delimiter = "\t";
+    else if(line.includes(";") && !line.includes(",")) delimiter = ";";
+
+    let parts = [];
+    if(delimiter === "\t") {
+      parts = line.split("\t");
+    } else {
+      const regex = new RegExp('(?:^|' + delimiter + ')("(?:[^"]|"")*"|[^"' + delimiter + ']*)', 'g');
+      let m;
+      while ((m = regex.exec(line)) !== null) {
+        let v = m[1] || "";
+        if(v.startsWith('"') && v.endsWith('"')) v = v.substring(1, v.length - 1).replace(/""/g, '"');
+        parts.push(v.trim());
+        if(m.index === regex.lastIndex) regex.lastIndex++;
+      }
+    }
+
+    parts = parts.map(p => p.trim());
+    if(!parts.length) continue;
+
+    const top = parts.join(" ").toLowerCase();
+    if(i === 0 && (top.includes("nomor") || top.includes("perihal") || top.includes("jenis"))){
+      continue;
+    }
+
+    let tipe = (parts[0] || "MASUK").toUpperCase();
+    if(tipe.includes("KELUAR")) tipe = "KELUAR"; else tipe = "MASUK";
+
+    let lembaga = (parts[1] || "YAYASAN").toUpperCase();
+    if(!["YAYASAN", "TK", "MI", "SMP", "SMK"].includes(lembaga)){
+      if(lembaga.includes("YAYASAN") || lembaga.includes("PONDOK")) lembaga = "YAYASAN";
+      else if(lembaga.includes("TK")) lembaga = "TK";
+      else if(lembaga.includes("MI")) lembaga = "MI";
+      else if(lembaga.includes("SMK")) lembaga = "SMK";
+      else lembaga = "SMP";
+    }
+
+    let noSurat = parts[2] || "-";
+    let tgl = parts[3] || new Date().toISOString().split("T")[0];
+    let pihak = parts[4] || "-";
+    let perihal = parts[5] || "-";
+    let sifat = parts[6] || "Biasa";
+    let berkas = parts[7] || "";
+
+    if(noSurat && noSurat !== "-"){
+      rows.push({
+        id: "SRT-" + (Date.now() + i).toString().slice(-6),
+        tipe, lembaga, noSurat, tgl, pihak, perihal, sifat, berkas
+      });
+    }
+  }
+
+  return rows;
+}
+
+function updateSuratPreview(){
+  const parsed = parseSuratCsv(pasteCsvSuratInput.value);
+  previewCountSuratLabel.textContent = parsed.length + " baris surat terdeteksi";
+}
+
+pasteCsvSuratInput.addEventListener("input", updateSuratPreview);
+
+btnProsesImportSurat.addEventListener("click", function(){
+  const parsed = parseSuratCsv(pasteCsvSuratInput.value);
+  if(!parsed.length){
+    tampilkanToast("⚠️ Tidak ada data surat yang valid.");
+    return;
+  }
+  DATA_SURAT = parsed.concat(DATA_SURAT);
+  simpanDataSurat();
+  updateTampilanTotal();
+  tutupModalImportSurat();
+  filterDanCariSurat(false);
+  tampilkanToast("✅ Berhasil menambahkan " + parsed.length + " agenda surat!");
+});
+
+// Filter Persuratan
+tabSuratButtons.forEach(btn => {
+  btn.addEventListener("click", function(){
+    selectedSuratLembaga = this.dataset.suratLembaga;
+    tabSuratButtons.forEach(b => b.classList.remove("active"));
+    this.classList.add("active");
+    filterDanCariSurat(Boolean(inputCariSurat.value.trim()));
+  });
+});
+
+chipSuratButtons.forEach(btn => {
+  btn.addEventListener("click", function(){
+    selectedSuratTipe = this.dataset.tipe;
+    chipSuratButtons.forEach(b => b.classList.remove("active"));
+    this.classList.add("active");
+    filterDanCariSurat(Boolean(inputCariSurat.value.trim()));
+  });
+});
+
+btnCariSurat.addEventListener("click", function(){ filterDanCariSurat(true); });
+btnResetSurat.addEventListener("click", function(){
+  inputCariSurat.value = "";
+  selectedSuratLembaga = "ALL";
+  selectedSuratTipe = "ALL";
+  tabSuratButtons.forEach(b => b.classList.remove("active"));
+  chipSuratButtons.forEach(b => b.classList.remove("active"));
+  document.querySelector('#kategoriSuratList .tab-btn[data-surat-lembaga="ALL"]').classList.add("active");
+  document.querySelector('#tipeSuratChips .chip-btn[data-tipe="ALL"]').classList.add("active");
+  filterDanCariSurat(false);
+  inputCariSurat.focus();
+});
+
+inputCariSurat.addEventListener("input", function(){ filterDanCariSurat(Boolean(this.value.trim())); });
+inputCariSurat.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){ e.preventDefault(); filterDanCariSurat(true); }
+  if(e.key === "Escape"){ btnResetSurat.click(); }
+});
+
+// Filter PTK / Siswa
+tabButtons.forEach(function(btn){
+  btn.addEventListener("click", function(){
+    selectedLembaga = this.dataset.kat;
+    tabButtons.forEach(b => b.classList.remove("active"));
+    this.classList.add("active");
+    filterDanCariData(Boolean(namaInput.value.trim()));
+  });
+});
+
+chipButtons.forEach(function(btn){
+  btn.addEventListener("click", function(){
+    selectedStatus = this.dataset.status;
+    chipButtons.forEach(b => b.classList.remove("active"));
+    this.classList.add("active");
+    filterDanCariData(Boolean(namaInput.value.trim()));
+  });
+});
+
+btnCari.addEventListener("click", function(){ filterDanCariData(true); });
+btnReset.addEventListener("click", function(){
+  namaInput.value = "";
+  selectedLembaga = "ALL";
+  selectedStatus = "ALL";
+  tabButtons.forEach(b => b.classList.remove("active"));
+  chipButtons.forEach(b => b.classList.remove("active"));
+  document.querySelector('#kategoriList .tab-btn[data-kat="ALL"]').classList.add("active");
+  document.querySelector('#statusChipsList .chip-btn[data-status="ALL"]').classList.add("active");
+  filterDanCariData(false);
+  namaInput.focus();
+});
+
+namaInput.addEventListener("input", function(){ filterDanCariData(Boolean(this.value.trim())); });
+namaInput.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){ e.preventDefault(); filterDanCariData(true); }
+  if(e.key === "Escape"){ btnReset.click(); }
+});
+
+// Modal PTK Form Manual
+function bukaModalTambahData(){
+  modalTitle.textContent = "➕ Tambah Data Satuan";
+  formIndex.value = "-1";
+  formNama.value = "";
+  formKategori.value = (selectedLembaga !== "ALL") ? selectedLembaga : "SMP";
+  formStatus.value = (selectedStatus !== "ALL") ? selectedStatus : "SISWA";
+  formEmail.value = "";
+  formDetail.value = "";
+  modalForm.classList.add("open");
+  formNama.focus();
+}
+
+function bukaModalEditData(idx){
+  const item = DATA[idx];
+  if(!item) return;
+  modalTitle.textContent = "✏️ Edit Data: " + item[1];
+  formIndex.value = idx;
+  formNama.value = item[1] || "";
+  formKategori.value = item[2] || "SMP";
+  formEmail.value = (item[0] && item[0] !== "-") ? item[0] : "";
+  formDetail.value = item[3] || "";
+  formStatus.value = item[4] || "PTK";
+  modalForm.classList.add("open");
+  formNama.focus();
+}
+
+function tutupModalForm(){ modalForm.classList.remove("open"); }
+btnTambahBaru.addEventListener("click", bukaModalTambahData);
+btnBatalForm.addEventListener("click", tutupModalForm);
+
+ptkForm.addEventListener("submit", function(e){
+  e.preventDefault();
+  const idx = parseInt(formIndex.value, 10);
+  const nama = formNama.value.trim();
+  const lembaga = formKategori.value;
+  const statusVal = formStatus.value;
+  const email = formEmail.value.trim() || "-";
+  const detail = formDetail.value.trim();
+
+  if(!nama){ tampilkanToast("⚠️ Nama tidak boleh kosong."); return; }
+
+  if(idx >= 0 && DATA[idx]) {
+    DATA[idx] = [email, nama, lembaga, detail, statusVal];
+    tampilkanToast("✅ Data berhasil diperbarui!");
+  } else {
+    DATA.unshift([email, nama, lembaga, detail, statusVal]);
+    tampilkanToast("✅ Data baru berhasil ditambahkan!");
+  }
+
+  simpanDataPTK();
+  updateTampilanTotal();
+  tutupModalForm();
+  filterDanCariData(Boolean(namaInput.value.trim()));
+});
+
+// Modal Upload Status Siswa
+function bukaModalUploadStatus(){
+  pasteCsvStatusInput.value = "";
+  previewCountStatusLabel.textContent = "0 nama terdeteksi";
+  if(selectedLembaga !== "ALL") uploadTargetLembaga.value = selectedLembaga;
+  if(selectedStatus !== "ALL" && ["LULUS","MUTASI","BERHENTI"].includes(selectedStatus)) {
+    uploadTargetStatus.value = selectedStatus;
+  }
+  modalUploadStatus.classList.add("open");
+  pasteCsvStatusInput.focus();
+}
+
+function tutupModalUploadStatus(){
+  modalUploadStatus.classList.remove("open");
+  fileCsvStatusInput.value = "";
+}
+
+btnUploadStatusSiswa.addEventListener("click", bukaModalUploadStatus);
+btnBatalUploadStatus.addEventListener("click", tutupModalUploadStatus);
+
+dropAreaStatus.addEventListener("click", function(){ fileCsvStatusInput.click(); });
+fileCsvStatusInput.addEventListener("change", function(e){
+  if(e.target.files.length) {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(evt){
+      pasteCsvStatusInput.value = evt.target.result;
+      updateStatusPreview();
+      tampilkanToast("📄 File status dimuat: " + file.name);
+    };
+    reader.readAsText(file);
+  }
+});
+
+function parseStatusCsv(text, lembagaDipilih, statusDipilih){
+  if(!text) return [];
+  const clean = text.replace(/^\uFEFF/, "");
+  const lines = clean.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const rows = [];
+
+  for(let i = 0; i < lines.length; i++){
+    const line = lines[i];
+    let delimiter = ",";
+    if(line.includes("\t")) delimiter = "\t";
+    else if(line.includes(";") && !line.includes(",")) delimiter = ";";
+
+    let parts = [];
+    if(delimiter === "\t") {
+      parts = line.split("\t");
+    } else {
+      const regex = new RegExp('(?:^|' + delimiter + ')("(?:[^"]|"")*"|[^"' + delimiter + ']*)', 'g');
+      let m;
+      while ((m = regex.exec(line)) !== null) {
+        let v = m[1] || "";
+        if(v.startsWith('"') && v.endsWith('"')) v = v.substring(1, v.length - 1).replace(/""/g, '"');
+        parts.push(v.trim());
+        if(m.index === regex.lastIndex) regex.lastIndex++;
+      }
+    }
+
+    parts = parts.map(p => p.trim());
+    if(!parts.length) continue;
+
+    const topRow = parts.join(" ").toLowerCase();
+    if(i === 0 && (topRow.includes("nama") && (topRow.includes("nisn") || topRow.includes("status")))){
+      continue;
+    }
+
+    let nama = parts[0];
+    let detail = parts[1] || "";
+    let keterangan = parts[2] || "";
+    let email = parts[3] || "-";
+
+    let gabunganDetail = [];
+    if(detail) gabunganDetail.push(detail);
+    if(keterangan) gabunganDetail.push(keterangan);
+    if(!gabunganDetail.length) gabunganDetail.push("Status: " + getBadgeStatusInfo(statusDipilih).label);
+
+    if(nama){
+      rows.push([email || "-", nama, lembagaDipilih, gabunganDetail.join(" | "), statusDipilih]);
+    }
+  }
+
+  return rows;
+}
+
+function updateStatusPreview(){
+  const parsed = parseStatusCsv(pasteCsvStatusInput.value, uploadTargetLembaga.value, uploadTargetStatus.value);
+  previewCountStatusLabel.textContent = parsed.length + " nama terdeteksi";
+}
+
+pasteCsvStatusInput.addEventListener("input", updateStatusPreview);
+
+btnDownloadTemplateStatus.addEventListener("click", function(){
+  const tmpl = 
+    "Nama Siswa,NISN / Kelas,Keterangan Tambahan (Tahun Lulus / Alasan / Sekolah Tujuan),Akun Belajar ID\r\n" +
+    "Ahmad Zulkarnain,NISN: 0081234567,Lulus Tahun Ajaran 2024/2025,ahmad@smp.belajar.id\r\n" +
+    "Baiq Nurhaliza,NISN: 0089988776,Pindah ke SMKN 1 Selong (Ikut Orang Tua),-\r\n" +
+    "M. Rayhan,NISN: 0092233445,Berhenti (Faktor Ekonomi / Bekerja),-\r\n";
+
+  const blob = new Blob(["\uFEFF" + tmpl], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "template_siswa_lulus_mutasi_berhenti.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  tampilkanToast("📥 Template Status Siswa diunduh.");
+});
+
+btnProsesUploadStatus.addEventListener("click", function(){
+  const targetLembaga = uploadTargetLembaga.value;
+  const targetStatus = uploadTargetStatus.value;
+  const parsed = parseStatusCsv(pasteCsvStatusInput.value, targetLembaga, targetStatus);
+
+  if(!parsed.length){
+    tampilkanToast("⚠️ Tidak ada baris nama siswa yang valid.");
+    return;
+  }
+
+  DATA = parsed.concat(DATA);
+  simpanDataPTK();
+  updateTampilanTotal();
+  tutupModalUploadStatus();
+  filterDanCariData(false);
+  tampilkanToast("✅ Berhasil menambahkan " + parsed.length + " siswa (" + getBadgeStatusInfo(targetStatus).label + " - " + targetLembaga + ")!");
+});
+
+// Import & Ekspor Umum Data Siswa/PTK
+btnImportCepat.addEventListener("click", function(){
+  pasteCsvInput.value = "";
+  previewCountLabel.textContent = "0 data terbaca";
+  modalImport.classList.add("open");
+  pasteCsvInput.focus();
+});
+btnBatalImport.addEventListener("click", function(){ modalImport.classList.remove("open"); });
+dropArea.addEventListener("click", function(){ fileCsvInput.click(); });
+fileCsvInput.addEventListener("change", function(e){
+  if(e.target.files.length) {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(evt){
+      pasteCsvInput.value = evt.target.result;
+      updateGeneralPreview();
+      tampilkanToast("📄 File dimuat: " + file.name);
+    };
+    reader.readAsText(file);
+  }
+});
+
+function parseGeneralCsv(text){
+  if(!text) return [];
+  const clean = text.replace(/^\uFEFF/, "");
+  const lines = clean.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const rows = [];
+
+  for(let i = 0; i < lines.length; i++){
+    const line = lines[i];
+    let delimiter = ",";
+    if(line.includes("\t")) delimiter = "\t";
+    else if(line.includes(";") && !line.includes(",")) delimiter = ";";
+
+    let parts = [];
+    if(delimiter === "\t") {
+      parts = line.split("\t");
+    } else {
+      const regex = new RegExp('(?:^|' + delimiter + ')("(?:[^"]|"")*"|[^"' + delimiter + ']*)', 'g');
+      let m;
+      while ((m = regex.exec(line)) !== null) {
+        let v = m[1] || "";
+        if(v.startsWith('"') && v.endsWith('"')) v = v.substring(1, v.length - 1).replace(/""/g, '"');
+        parts.push(v.trim());
+        if(m.index === regex.lastIndex) regex.lastIndex++;
+      }
+    }
+
+    parts = parts.map(p => p.trim());
+    if(!parts.length) continue;
+
+    const topRow = parts.join(" ").toLowerCase();
+    if(i === 0 && (topRow.includes("nama") && (topRow.includes("lembaga") || topRow.includes("email")))){
+      continue;
+    }
+
+    let email = parts[0] || "-";
+    let nama = parts[1] || "";
+    let lembaga = (parts[2] || "SMP").toUpperCase();
+    let detail = parts[3] || "";
+    let statusVal = (parts[4] || "PTK").toUpperCase();
+
+    if(!["TK", "MI", "SMP", "SMK"].includes(lembaga)){
+      if(lembaga.includes("TK")) lembaga = "TK";
+      else if(lembaga.includes("MI")) lembaga = "MI";
+      else if(lembaga.includes("SMK")) lembaga = "SMK";
+      else lembaga = "SMP";
+    }
+
+    if(nama){
+      rows.push([email || "-", nama, lembaga, detail || "-", statusVal]);
+    }
+  }
+
+  return rows;
+}
+
+function updateGeneralPreview(){
+  const rows = parseGeneralCsv(pasteCsvInput.value);
+  previewCountLabel.textContent = rows.length + " data valid terdeteksi";
+}
+pasteCsvInput.addEventListener("input", updateGeneralPreview);
+
+btnProsesImport.addEventListener("click", function(){
+  const parsed = parseGeneralCsv(pasteCsvInput.value);
+  if(!parsed.length){
+    tampilkanToast("⚠️ Tidak ada data valid yang dapat diimpor.");
+    return;
+  }
+  DATA = parsed.concat(DATA);
+  simpanDataPTK();
+  updateTampilanTotal();
+  modalImport.classList.remove("open");
+  filterDanCariData(false);
+  tampilkanToast("✅ Berhasil menambahkan " + parsed.length + " data baru!");
+});
+
+btnEksporCSV.addEventListener("click", function(){
+  if(!DATA.length){
+    tampilkanToast("⚠️ Database masih kosong.");
+    return;
+  }
+  let csv = "Email,Nama,Lembaga,Detail,Status\r\n";
+  DATA.forEach(row => {
+    const e = '"' + String(row[0] || "").replace(/"/g, '""') + '"';
+    const n = '"' + String(row[1] || "").replace(/"/g, '""') + '"';
+    const l = '"' + String(row[2] || "").replace(/"/g, '""') + '"';
+    const d = '"' + String(row[3] || "").replace(/"/g, '""') + '"';
+    const s = '"' + String(row[4] || "PTK").replace(/"/g, '""') + '"';
+    csv += [e, n, l, d, s].join(",") + "\r\n";
+  });
+
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "ekspor_data_lengkap_sekolah.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  tampilkanToast("📥 Seluruh data (" + DATA.length + ") berhasil diekspor.");
+});
+
+btnResetDefault.addEventListener("click", function(){
+  bukaKonfirmasi(
+    "Reset Database",
+    "Kembalikan data PTK & Siswa ke database resmi bawaan?",
+    function(){
+      DATA = JSON.parse(JSON.stringify(DEFAULT_DATABASE));
+      simpanDataPTK();
+      updateTampilanTotal();
+      tampilkanToast("🔄 Database berhasil direset.");
+      filterDanCariData(false);
+    }
+  );
+});
+
+// Event penutup modal klik di luar / Escape
+[modalForm, modalConfirm, modalAdminAuth, modalImport, modalUploadStatus, modalSuratForm, modalImportSurat].forEach(m => {
+  m.addEventListener("click", function(e){
+    if(e.target === m) m.classList.remove("open");
+  });
+});
+
+window.addEventListener("keydown", function(e){
+  if(e.key === "Escape"){
+    document.querySelectorAll(".modal-overlay.open").forEach(m => m.classList.remove("open"));
+  }
+});
+
+// Booting inisialisasi
+muatData();
+updateTampilanTotal();
+filterDanCariData(false);
+filterDanCariSurat(false);
+})();
+</script>
+</body>
+</html>
